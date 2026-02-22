@@ -1,0 +1,118 @@
+﻿.pool-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    height: calc(100vh - 80px);
+
+    position: relative;
+}
+
+@media (max-width: 768px) {
+    .pool-container {
+        height: calc(100vh - 110px);
+    }
+}
+
+.pool-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.pool-header h2 { margin: 0; color: var(--accent-color); }
+.pool-header p { color: var(--text-muted); margin-top: 5px; }
+
+/* Kartın duracağı alan */
+.card-stack {
+    position: relative;
+    width: 320px;
+    height: 480px;
+    perspective: 1000px;
+}
+
+/* Kartın kendisi */
+.swipe-card {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--sidebar-bg);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    transition: transform 0.4s ease-out, opacity 0.4s ease-out; /* Kayma animasyonu */
+    border: 1px solid var(--border-color);
+}
+
+.swipe-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Kartın altındaki koyu bilgi alanı */
+.swipe-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 30px 20px 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 60%, transparent 100%);
+    color: white;
+}
+
+.swipe-info h3 { margin: 0 0 5px 0; font-size: 1.4rem; }
+.swipe-info p { margin: 0; font-size: 0.9rem; opacity: 0.8; }
+
+/* Ekleyen Rozeti (Farklı Bir Tasarım) */
+.pool-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--accent-color);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* Alt kısımdaki aksiyon butonları */
+.swipe-actions {
+    display: flex;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.action-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: none;
+    font-size: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    transition: transform 0.2s, background 0.2s;
+    background: var(--sidebar-bg);
+}
+
+.btn-nope { color: #ef4444; border: 2px solid #ef4444; }
+.btn-like { color: #22c55e; border: 2px solid #22c55e; }
+
+.btn-nope:hover { background: #ef4444; color: white; transform: scale(1.1); }
+.btn-like:hover { background: #22c55e; color: white; transform: scale(1.1); }
+.action-btn:active { transform: scale(0.95); }
+
+/* ---- ANİMASYON SINIFLARI ---- */
+.swipe-out-left {
+    transform: translateX(-150%) rotate(-20deg) !important;
+    opacity: 0;
+}
+
+.swipe-out-right {
+    transform: translateX(150%) rotate(20deg) !important;
+    opacity: 0;
+}

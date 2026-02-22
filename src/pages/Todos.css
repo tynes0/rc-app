@@ -1,0 +1,573 @@
+﻿.todos-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+}
+
+.todo-header {
+    margin-bottom: 30px;
+}
+
+.todo-header h2 {
+    color: var(--accent-color);
+    margin: 0 0 5px 0;
+}
+
+.todo-header p {
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.todo-form {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 40px;
+    background: var(--sidebar-bg);
+    padding: 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.todo-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-size: 1.1rem;
+    padding: 10px 15px;
+    outline: none;
+}
+
+.todo-input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+.todo-submit {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 0 25px;
+    border-radius: 14px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.todo-submit:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+}
+
+.todo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.todo-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--sidebar-bg);
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+}
+
+.todo-item:hover {
+    border-color: var(--accent-color);
+    transform: translateX(5px);
+}
+
+.todo-item.completed {
+    opacity: 0.6;
+    background: rgba(0,0,0,0.1);
+    border-color: transparent;
+}
+
+.todo-checkbox {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.todo-item:hover .todo-checkbox:not(.checked) {
+    border-color: var(--accent-color);
+}
+
+.todo-checkbox.checked {
+    background: #22c55e;
+    border-color: #22c55e;
+    color: white;
+}
+
+.todo-text {
+    flex: 1;
+    font-size: 1.1rem;
+    color: var(--text-main);
+    transition: all 0.3s ease;
+    word-break: break-word;
+}
+
+.todo-item.completed .todo-text {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.todo-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.todo-badge {
+    background: var(--bg-color);
+    padding: 6px 12px;
+    border-radius: 12px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: capitalize;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.todo-delete {
+    background: transparent;
+    color: #ef4444;
+    border: none;
+    cursor: pointer;
+    font-size: 1.3rem;
+    padding: 10px;
+    border-radius: 10px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.todo-delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    transform: scale(1.1);
+}
+
+/* ---- YENİ EKLENEN GELİŞMİŞ ÖZELLİKLER ---- */
+
+/* Gelişmiş Form Tasarımı */
+.todo-form {
+    flex-direction: column;
+    gap: 0;
+}
+
+.todo-form-main {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+.todo-form-options {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed var(--border-color);
+    flex-wrap: wrap;
+}
+
+.todo-select {
+    background: var(--bg-color);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 10px;
+    outline: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.todo-select:focus {
+    border-color: var(--accent-color);
+}
+
+/* Liste İçi Detaylar (Kategori, Öncelik vs.) */
+.todo-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.todo-details {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Renkli Rozetler (Badges) */
+.detail-badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Öncelik Renkleri */
+.priority-Acil { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+.priority-Normal { background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.3); }
+.priority-Düşük { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
+
+/* Kategori Renkleri */
+.cat-Alışveriş { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+.cat-Ev { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+.cat-Plan { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
+.cat-Diğer { background: rgba(100, 116, 139, 0.15); color: #94a3b8; }
+
+/* Sorumlu Kişi Tasarımı */
+.assignee-badge {
+    background: var(--bg-color);
+    color: var(--text-main);
+    border: 1px dotted var(--text-muted);
+}
+
+/* ---- POP-UP (MODAL) VE YENİ TASARIM EKLENTİLERİ ---- */
+
+/* Çirkin Select Okunu Düzeltme */
+.todo-select {
+    /* Tarayıcının varsayılan okunu ve beyaz arka planını siler */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    /* Yerine modern, ince, gri bir SVG oku koyar */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 14px;
+    padding-right: 35px; /* Ok ikonunun yazının üstüne binmesini engeller */
+}
+
+/* Sağ Alt Köşedeki Ekle Butonu (FAB - Floating Action Button) */
+.fab-add-btn {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    box-shadow: 0 10px 25px rgba(217, 70, 239, 0.4);
+    font-size: 1.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 90;
+}
+
+.fab-add-btn:hover {
+    transform: scale(1.1) rotate(90deg); /* Üzerine gelince tatlı bir dönüş */
+    background-color: var(--accent-hover);
+}
+
+@media (max-width: 768px) {
+    .fab-add-btn {
+        bottom: 25px;
+        right: 25px;
+        width: 55px;
+        height: 55px;
+        font-size: 1.5rem;
+    }
+}
+
+/* Yeni Ekleme Pop-up'ı (Modal) */
+.add-todo-modal {
+    background: var(--sidebar-bg);
+    padding: 35px 30px;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 500px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    position: relative;
+    color: var(--text-main);
+}
+
+.add-todo-header h3 {
+    margin: 0 0 5px 0;
+    color: var(--accent-color);
+    font-size: 1.6rem;
+}
+
+.add-todo-header p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.add-todo-input {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-size: 1.1rem;
+    padding: 16px;
+    border-radius: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+}
+
+.add-todo-input:focus {
+    border-color: var(--accent-color);
+}
+
+.add-todo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.add-todo-submit {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 14px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.add-todo-submit:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
+/* ---- GÖREV DURUMU VE ACİLİYET VURGULARI ---- */
+
+/* Acil Görevler İçin Kırmızı Sol Kenarlık ve Arka Plan Vurgusu */
+.todo-item.urgent-task {
+    border-left: 6px solid #ef4444;
+    background: linear-gradient(to right, rgba(239, 68, 68, 0.08), var(--sidebar-bg) 40%);
+}
+
+/* Acil Rozeti İçin Kalp Atışı (Pulse) Efekti */
+.priority-Acil {
+    animation: pulse-red 2s infinite;
+}
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+    70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* Bana Ait Olmayan Görevler (Soluk ve Gölgeli) */
+.todo-item.dimmed-task {
+    opacity: 0.45; /* Daha soluk */
+    transform: scale(0.98); /* Hafifçe geride durur */
+    background: rgba(0, 0, 0, 0.15); /* Arka planı koyulaştırır */
+    border-color: transparent;
+}
+
+.todo-item.dimmed-task:hover {
+    opacity: 0.8;
+    transform: scale(0.99);
+}
+
+/* Bana Ait veya Ortak Görevler (Daha Parlak ve Belirgin) */
+.todo-item.my-task {
+    border-color: var(--accent-color);
+    box-shadow: 0 4px 15px rgba(217, 70, 239, 0.15); /* Tema renginde tatlı bir parlama */
+}
+
+/* ---- İLERLEME ÇUBUĞU (PROGRESS BAR) ---- */
+.progress-container {
+    background: var(--sidebar-bg);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 30px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: var(--text-main);
+}
+
+.progress-track {
+    width: 100%;
+    height: 12px;
+    background: var(--bg-color);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-color), #f472b6);
+    border-radius: 10px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* SADECE BANA AİT FİLTRESİ BUTONU */
+.filter-toggle-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto; /* Sağa yaslar */
+}
+
+.filter-toggle-btn.active {
+    background: rgba(168, 85, 247, 0.15);
+    color: #a855f7;
+    border-color: #a855f7;
+}
+
+/* GÖREV AÇIKLAMASI (NOTLAR) */
+.todo-description {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 5px;
+    line-height: 1.4;
+    background: rgba(0,0,0,0.1);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border-left: 3px solid var(--border-color);
+}
+
+/* HEDEF TARİH ROZETLERİ */
+.deadline-badge {
+    background: rgba(100, 116, 139, 0.15);
+    color: #94a3b8;
+}
+.deadline-today {
+    background: rgba(234, 179, 8, 0.15);
+    color: #eab308;
+    animation: pulse-orange 2s infinite;
+}
+.deadline-overdue {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    font-weight: bold;
+}
+
+@keyframes pulse-orange {
+    0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(234, 179, 8, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+}
+
+/* YENİ EKLENEN AÇIKLAMA VE TARİH İNPUTLARI */
+.add-todo-textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+/* KONFETİ EFEKTİ SİNIFLARI */
+.confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.confetti-particle {
+    position: absolute;
+    top: -50px;
+    font-size: 24px;
+    animation: fall linear forwards;
+}
+
+@keyframes fall {
+    to { transform: translateY(105vh) rotate(720deg); }
+}
+
+/* ---- MOBİL EKRAN DÜZELTMELERİ ---- */
+@media (max-width: 768px) {
+    /* 1. Sekmeleri Merkeze Al ve Düzenle */
+    .tabs-container {
+        justify-content: center;
+        gap: 10px;
+    }
+    .tab-btn {
+        flex: 1 1 45%; /* İki sekme yan yana tam sığsın */
+        justify-content: center;
+        padding: 10px 5px;
+        font-size: 0.9rem;
+    }
+    .filter-toggle-btn {
+        width: 100%; /* Sadece Benimkiler butonu alta geçip tam ekran olsun */
+        justify-content: center;
+        margin-top: 5px;
+    }
+
+    /* 2. Pop-up (Modal) Taşmasını Engelle */
+    .add-todo-modal {
+        width: 95%; /* Ekrana sığsın */
+        padding: 20px 15px; /* İç boşluğu daralt */
+        max-height: 90vh;
+        overflow-y: auto; /* Dikeyde sığmazsa kendi içinde kaysın */
+    }
+    .add-todo-grid {
+        display: flex;
+        flex-direction: column; /* Yan yana olan inputları alt alta al */
+        gap: 15px;
+    }
+    .add-todo-input, .todo-select {
+        width: 100%;
+        box-sizing: border-box; /* Padding yüzünden taşmayı engeller */
+    }
+}

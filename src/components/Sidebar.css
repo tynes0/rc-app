@@ -1,0 +1,225 @@
+﻿/* Genel Sidebar Stilleri */
+.sidebar {
+    background-color: var(--sidebar-bg);
+    border-right: 2px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease;
+    overflow: hidden;
+    z-index: 100;
+    flex-shrink: 0;
+}
+
+/* Bilgisayar: Açık ve Kapalı Genişlikler */
+.sidebar.open {
+    width: 250px;
+}
+.sidebar.closed {
+    width: 80px;
+}
+
+/* Üst Başlık ve İkonlar */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    height: 76px;
+}
+.sidebar.closed .sidebar-header {
+    justify-content: center;
+}
+.logo-text {
+    color: var(--accent-color);
+    font-size: 1.5rem;
+    margin: 0;
+    white-space: nowrap;
+}
+.toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.toggle-btn:hover {
+    background: var(--border-color);
+    color: var(--accent-color);
+}
+
+/* Navigasyon Linkleri (Modernize Edilmiş Butonlar) */
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 16px;
+    margin-top: 20px;
+    flex: 1;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    color: var(--text-main);
+    padding: 12px 14px;
+    border-radius: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.sidebar.closed .nav-item {
+    justify-content: center;
+    padding: 12px 0;
+}
+.sidebar.closed .nav-text {
+    display: none;
+    opacity: 0;
+}
+.nav-item i {
+    font-size: 1.2rem;
+    width: 24px;
+    text-align: center;
+    transition: color 0.2s;
+}
+
+/* Animasyonlu Hover ve Aktif State */
+.nav-item:hover {
+    background: var(--border-color);
+    color: var(--accent-color);
+    transform: translateX(5px); /* Üzerine gelince sağa kayma efekti */
+}
+.sidebar.closed .nav-item:hover {
+    transform: scale(1.15); /* İkon modundayken üzerine gelince büyüme efekti */
+}
+
+.nav-item.active {
+    background: var(--accent-color);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(217, 70, 239, 0.3); /* Seçiliyken pastel gölge */
+}
+.nav-item.active i {
+    color: #fff;
+}
+
+.quit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 20px 16px;
+    padding: 14px;
+    background: var(--border-color);
+    color: var(--text-main);
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+.quit-btn:hover {
+    background: var(--accent-color);
+    color: #fff;
+}
+.sidebar.closed .quit-btn {
+    margin: 20px auto;
+    padding: 14px 0;
+    width: 48px;
+}
+.sidebar.closed .quit-btn .nav-text {
+    display: none;
+}
+
+/* ---- MOBİL UYARLAMALAR ---- */
+.mobile-menu-btn { display: none; }
+.sidebar-overlay { display: none; }
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        left: 0;
+        width: 260px !important; /* Mobilde her zaman tam genişlik */
+        transform: translateX(-100%); /* Kapalıyken ekran dışına it */
+        box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+    }
+    .sidebar.open {
+        transform: translateX(0); /* Menü açıldığında içeri kaydır */
+    }
+
+    .sidebar-header .toggle-btn {
+        display: none; /* Mobilde kendi kapatma butonuna gerek yok, dışarı tıklanacak */
+    }
+
+    /* Mobilde görünen hamburger menü butonu */
+    .mobile-menu-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 90;
+        background: var(--sidebar-bg);
+        border: 2px solid var(--border-color);
+        color: var(--accent-color);
+        border-radius: 12px;
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    .mobile-menu-btn.hidden {
+        transform: scale(0);
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .sidebar-overlay {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(2px);
+        z-index: 95;
+        animation: fadeIn 0.3s ease forwards;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+}
+
+.logo-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 10px;
+}
+
+.logo-text {
+    transition: transform 0.3s ease;
+}
+
+.logo-text:hover {
+    transform: scale(1.1);
+}

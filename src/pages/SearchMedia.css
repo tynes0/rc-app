@@ -1,0 +1,280 @@
+﻿.search-media-container {
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.search-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.search-form {
+    display: flex;
+    gap: 10px;
+    max-width: 600px;
+    margin: 0 auto 40px auto;
+}
+
+.search-input {
+    flex: 1;
+    padding: 15px 20px;
+    border-radius: 25px;
+    border: 1px solid var(--border-color);
+    background: var(--sidebar-bg);
+    color: var(--text-main);
+    font-size: 1rem;
+    outline: none;
+}
+
+.search-btn {
+    padding: 0 25px;
+    border-radius: 25px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.search-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.search-card {
+    background: var(--sidebar-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color);
+}
+
+.search-card-img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.search-card-info {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.search-card-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+}
+
+.media-badge {
+    background: rgba(192, 132, 252, 0.2);
+    color: var(--accent-color);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.search-card-title {
+    margin: 0 0 5px 0;
+    font-size: 1.1rem;
+    color: var(--text-main);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.search-card-date {
+    margin: 0 0 15px 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.search-card-actions {
+    margin-top: auto;
+    display: flex;
+    gap: 10px;
+}
+
+.search-card-actions button {
+    flex: 1;
+    padding: 10px 5px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.add-pool-btn { background: #3b82f6; }
+.add-list-btn { background: var(--accent-color); }
+.added-btn { background: #475569; cursor: not-allowed !important; opacity: 0.7; }
+
+/* ---- KARTLARI TIKLANABİLİR YAPMA ---- */
+.search-card {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+.search-card-img-wrapper {
+    position: relative;
+    width: 100%;
+    height: 300px;
+}
+
+.search-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Üzerine gelince beliren "Detaylar" overlay'i */
+.click-to-view-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    gap: 8px;
+}
+
+.search-card-img-wrapper:hover .click-to-view-overlay {
+    opacity: 1;
+}
+
+/* ---- DETAY MODALI TASARIMI ---- */
+.media-detail-modal {
+    background: var(--bg-color);
+    width: 90%;
+    max-width: 800px;
+    border-radius: 15px;
+    position: relative;
+    padding: 25px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    border: 1px solid var(--border-color);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.media-detail-content {
+    display: flex;
+    gap: 25px;
+}
+
+.media-detail-poster {
+    width: 250px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.media-detail-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.media-detail-info h2 {
+    margin: 0 0 15px 0;
+    font-size: 2rem;
+    color: var(--text-main);
+}
+
+.media-detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.detail-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--sidebar-bg);
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.detail-tag.rating { color: #fbbf24; }
+
+.media-genres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.genre-pill {
+    background: rgba(192, 132, 252, 0.15);
+    color: var(--accent-color);
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.media-detail-overview h4 {
+    margin: 0 0 10px 0;
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 5px;
+}
+
+.media-detail-overview p {
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.media-detail-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: auto; /* Butonları en alta iter */
+}
+
+.media-detail-actions button {
+    flex: 1;
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 10px;
+}
+
+/* MOBİL TASARIM İÇİN */
+@media (max-width: 768px) {
+    .media-detail-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .media-detail-poster {
+        width: 180px;
+    }
+    .media-detail-tags, .media-genres {
+        justify-content: center;
+    }
+    .media-detail-actions {
+        flex-direction: column;
+    }
+}

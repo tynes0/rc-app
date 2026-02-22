@@ -1,0 +1,716 @@
+﻿.gallery-container {
+    width: 100% !important;
+    max-width: none !important; /* Varsa sınırı kaldır */
+    padding: 20px; /* Kenarlardan hafif boşluk kalsın */
+    box-sizing: border-box;
+}
+
+/* Grid yapısı da bu alanın tamamına yayılsın */
+.gallery-grid {
+    width: 100% !important;
+    max-width: none !important;
+    display: grid;
+    /* Sütunlar en az 200px olsun ama kalan boşluğu dolduracak şekilde yayılsınlar */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+/* ---- ANA SEKMELER VE SAĞDAKİ GÖRÜNÜM İKONLARI (YENİ DÜZEN) ---- */
+.gallery-main-tabs-wrapper {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; /* Sol boşluk, Merkez sekmeler, Sağ butonlar */
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 10px;
+}
+
+.gallery-main-tabs {
+    grid-column: 2; /* Sekmeleri merkeze zorla */
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.view-toggles-container {
+    grid-column: 3; /* Butonları en sağa at */
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Mobilde yan yana sığmazlarsa alt alta şık bir şekilde dizilsinler */
+@media (max-width: 768px) {
+    .gallery-main-tabs-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+
+/* ---- SLAYT MODU SABİT EKRAN (NO SCROLL) DÜZELTMESİ ---- */
+/* Ana layout boşluklarını da hesaba katarak scrollbar çıkmasını KESİN olarak engelliyoruz */
+.gallery-container.no-scroll {
+    height: calc(100vh - 120px); /* Yüksekliği biraz daha kıstık ki sığsın */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important; /* Scroll'u zorla kapatıyoruz */
+    padding-bottom: 0;
+}
+
+/* Slayt modunda sekmelerin alt boşluğunu azalt ki medyaya yer kalsın */
+.gallery-container.no-scroll .gallery-main-tabs-wrapper {
+    margin-bottom: 15px;
+}
+
+.main-tab {
+    background: var(--sidebar-bg);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 10px 30px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.main-tab:hover {
+    color: var(--text-main);
+}
+
+.main-tab.active {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+    box-shadow: 0 8px 20px rgba(217, 70, 239, 0.4);
+}
+
+/* ALBÜM LİSTESİ (KART GÖRÜNÜMÜ) */
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.album-card {
+    background: var(--sidebar-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.album-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-color);
+    box-shadow: 0 10px 25px rgba(217, 70, 239, 0.2);
+}
+
+.album-card-img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.album-card-info {
+    padding: 15px;
+}
+
+.album-card-title {
+    margin: 0 0 5px 0;
+    font-size: 1.2rem;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.album-card-meta {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* ALBÜM DETAY BAŞLIĞI VE AYARLAR BUTONU */
+.album-header-box {
+    background: linear-gradient(to right, rgba(217, 70, 239, 0.1), transparent);
+    border-left: 4px solid var(--accent-color);
+    padding: 20px;
+    border-radius: 0 16px 16px 0;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.back-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 6px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+.back-btn:hover { background: var(--border-color); }
+
+.album-settings-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 8px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.album-settings-btn:hover {
+    background: var(--sidebar-bg);
+    color: var(--text-main);
+    border-color: var(--text-main);
+}
+
+/* AYARLAR MODALI KAPAK SEÇİCİ */
+.cover-selector-container {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px 0;
+    margin-bottom: 15px;
+}
+
+.cover-option {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.2s;
+    opacity: 0.6;
+}
+
+.cover-option:hover { opacity: 1; }
+.cover-option.selected {
+    border-color: var(--accent-color);
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.view-toggles {
+    display: flex;
+    gap: 5px;
+    background: var(--bg-color);
+    padding: 5px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.view-btn {
+    background: transparent; color: var(--text-muted); border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+}
+.view-btn.active { background: var(--sidebar-bg); color: var(--accent-color); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+}
+
+.photo-card {
+    position: relative; border-radius: 16px; overflow: hidden; background: var(--sidebar-bg); border: 1px solid var(--border-color); box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.3s ease;
+}
+.photo-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+
+.photo-img-wrapper { aspect-ratio: 1 / 1; overflow: hidden; cursor: pointer; position: relative; }
+.photo-img { width: 100%; height: 100%; object-fit: cover; transition: filter 0.3s, transform 0.5s; }
+.photo-card:hover .photo-img { filter: brightness(0.8); transform: scale(1.05); }
+
+/* --- DÜZELTİLEN SİL BUTONU --- */
+.photo-delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    border: none;
+    /* Sabit en/boy ve flex ile ikonun yamuk durmasını kesin engelleriz */
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0; /* Normalde gizli */
+    transform: scale(0.8);
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.photo-card:hover .photo-delete-btn { opacity: 1; transform: scale(1); }
+.photo-delete-btn:hover { background: #dc2626; transform: scale(1.1) !important; }
+
+/* Mobilde hover olmadığı için silme butonunu hep göster */
+@media (max-width: 768px) {
+    .photo-delete-btn {
+        opacity: 0.9;
+        transform: scale(1);
+    }
+}
+
+/* 2. SLAYT (SLIDER) GÖRÜNÜMÜ */
+.slider-container { position: relative; width: 100%; max-width: 800px; margin: 0 auto; background: var(--sidebar-bg); border-radius: 20px; border: 1px solid var(--border-color); overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+.slider-touch-area { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; cursor: grab; }
+.slider-touch-area:active { cursor: grabbing; }
+.slider-img, .slider-video { width: 100%; height: 60vh; object-fit: contain; background: #000; outline: none; }
+.slider-info { padding: 20px; text-align: center; }
+.slider-info h4 { margin: 0 0 10px 0; color: var(--text-main); font-size: 1.2rem; }
+.slider-controls { position: absolute; top: 50%; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 15px; transform: translateY(-50%); pointer-events: none; }
+.slider-arrow { background: rgba(0,0,0,0.6); color: white; border: 2px solid rgba(255,255,255,0.2); width: 50px; height: 50px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; pointer-events: auto; backdrop-filter: blur(4px); transition: all 0.2s; }
+.slider-arrow:hover { background: var(--accent-color); transform: scale(1.1); }
+
+/* EKSTRALAR */
+.video-duration-badge { position: absolute; bottom: 10px; right: 10px; background: rgba(0, 0, 0, 0.7); color: white; padding: 4px 8px; border-radius: 8px; font-size: 0.8rem; font-weight: 500; display: flex; align-items: center; gap: 5px; backdrop-filter: blur(4px); pointer-events: none; }
+.upload-area { border: 2px dashed var(--border-color); border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; background: rgba(255, 255, 255, 0.02); }
+.selected-files-list { max-height: 100px; overflow-y: auto; font-size: 0.85rem; color: var(--text-muted); text-align: left; margin-top: 10px; padding: 5px 10px; background: rgba(0,0,0,0.1); border-radius: 8px; }
+.selected-files-list div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+.lightbox-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.lightbox-img { max-width: 90vw; max-height: 90vh; border-radius: 10px; }
+.lightbox-close { position: absolute; top: 20px; right: 30px; background: transparent; color: white; border: none; font-size: 2rem; cursor: pointer; }
+.photo-details-grid { padding: 12px; }
+.photo-details-grid p { margin: 0 0 5px 0; font-size: 0.9rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---- AÇILIR MENÜ (SELECT) OKUNU DÜZELTME ---- */
+select.add-todo-input {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+/* ---- ÖZEL VİDEO OYNATICI (CUSTOM PLAYER) ---- */
+.custom-video-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    overflow: hidden;
+    border-radius: inherit;
+}
+
+.custom-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    outline: none;
+}
+
+.video-overlay-play {
+    position: absolute;
+    background: rgba(217, 70, 239, 0.85); /* Tema rengimiz (Mor) */
+    color: white;
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    padding-left: 5px; /* Play ikonunu merkeze oturtmak için ufak hile */
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+    z-index: 10;
+}
+
+.video-overlay-play:hover {
+    transform: scale(1.1);
+    background: var(--accent-color);
+}
+
+.custom-video-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 30px 20px 15px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 15;
+}
+
+/* Mobilde hep görünür, masaüstünde hover ile gelir */
+@media (max-width: 768px) {
+    .custom-video-controls { opacity: 1; }
+}
+.custom-video-wrapper:hover .custom-video-controls { opacity: 1; }
+
+.custom-video-controls button {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.custom-video-controls button:hover { color: var(--accent-color); }
+
+.video-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: height 0.2s;
+}
+
+.video-progress-bar:hover { height: 8px; }
+
+.video-progress-fill {
+    height: 100%;
+    background: var(--accent-color);
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+.video-time {
+    color: white;
+    font-size: 0.85rem;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+/* ---- VİDEO VE SES KONTROLLERİ ---- */
+
+/* Dikey Videoların Slayt İçinde Taşmasını Engelle */
+.slider-video.custom-video-wrapper {
+    max-height: 70vh; /* Ekran yüksekliğinin %70'i ile sınırla */
+    width: auto; /* Genişliği otomatik ayarla */
+    margin: 0 auto; /* Merkeze hizala */
+}
+
+/* Ses Kontrol Alanı */
+.video-volume-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Ses Kaydırıcısı (Slider) - Dikey */
+.video-volume-slider {
+    position: absolute;
+    bottom: 100%; /* İkonun üstünde başla */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 100px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 15px;
+    padding: 10px 0;
+    display: flex;
+    justify-content: center;
+    opacity: 0; /* Başlangıçta gizli */
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+/* İkona veya kaydırıcının kendisine gelince göster */
+.video-volume-container:hover .video-volume-slider,
+.video-volume-slider:hover {
+    opacity: 1;
+    visibility: visible;
+    bottom: 140%; /* Biraz daha yukarı kaydır */
+}
+
+/* Kaydırıcı Çubuğu (Range Input) */
+.volume-range {
+    writing-mode: bt-lr; /* Dikey kaydırıcı için */
+    /* -webkit-appearance: slider-vertical; */ 
+    width: 8px;
+    height: 80%;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+}
+
+.volume-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* ---- FOTOĞRAF DETAY YAZILARI (TİPOGRAFİ) ---- */
+.photo-details-grid p {
+    margin: 0 0 4px 0;
+    font-size: 0.85rem; /* Boyutu küçült */
+    font-weight: 400; /* Kalınlığı azalt (Normal) */
+    color: var(--text-muted); /* Rengi soldur */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.photo-details-grid span {
+    font-size: 0.75rem; /* Tarih ve kişi bilgisini daha da küçült */
+    font-weight: 400; /* Kalınlığı azalt */
+    color: var(--text-muted); /* Rengi soldur */
+    opacity: 0.8; /* Biraz daha şeffaflaştır */
+}
+
+/* Slayt (Slider) Altındaki Bilgiler İçin de Geçerli */
+.slider-info h4 {
+    margin: 0 0 8px 0;
+    color: var(--text-main);
+    font-size: 1rem; /* Başlık boyutunu küçült */
+    font-weight: 500; /* Orta kalınlık */
+}
+
+.slider-info p {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    opacity: 0.8;
+}
+
+/* ---- TAM EKRAN (LIGHTBOX) NAVİGASYON EKLENTİLERİ ---- */
+
+.lightbox-content-wrapper {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: grab;
+    padding: 20px 80px; /* Oklara yer açmak için yanlardan boşluk */
+}
+
+.lightbox-content-wrapper:active {
+    cursor: grabbing;
+}
+
+.lightbox-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.2);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    transition: all 0.2s;
+    z-index: 10001; /* Resmin üstünde kalsın */
+}
+
+.lightbox-arrow:hover {
+    background: var(--accent-color);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.lightbox-arrow.left { left: 20px; }
+.lightbox-arrow.right { right: 20px; }
+
+/* Mobilde okları biraz küçült ve kenarlara yaklaştır */
+@media (max-width: 768px) {
+    .lightbox-arrow { width: 45px; height: 45px; font-size: 1.2rem; }
+    .lightbox-arrow.left { left: 10px; }
+    .lightbox-arrow.right { right: 10px; }
+    .lightbox-content-wrapper { padding: 10px; }
+}
+
+/* Lightbox içindeki resimlerin esneme ayarı */
+.lightbox-img {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    pointer-events: none; /* Kaydırma hareketini engellemesin diye */
+}
+
+/* Lightbox içindeki video çerçevesi */
+.lightbox-video-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    height: 85vh;
+}
+
+/* ---- ZIPLAMAYI ÖNLEYEN SABİT KUTU AYARI ---- */
+
+/* Medyanın durduğu siyah alana kesin ve sabit bir yükseklik veriyoruz. 
+   Böylece video da gelse, yatay/dikey resim de gelse kutunun boyu ASLA değişmez. */
+.slider-touch-area {
+    width: 100%;
+    height: 60vh; /* Kutu yüksekliği sabit kilitlendi */
+    min-height: 400px; /* Çok küçük ekranlarda ezilmesin diye sınır */
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    position: relative;
+}
+
+.slider-touch-area:active {
+    cursor: grabbing;
+}
+
+/* Hem resimlerin hem de videoların bu kilitli alana %100 oturmasını ve taşmamasını sağlıyoruz */
+.slider-img,
+.slider-video.custom-video-wrapper {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Sığdır ve yanlara siyah bar at (Eski o güzel hali) */
+    margin: 0;
+}
+
+/* Özel video oynatıcının içindeki asıl videonun da formata uymasını garantiye alıyoruz */
+.custom-video-wrapper .custom-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* ---- MOBİL EKRAN DÜZELTMELERİ ---- */
+@media (max-width: 768px) {
+    /* 1. Pop-up Taşmasını Engelle (Todos ile aynı mantık) */
+    .add-todo-modal {
+        width: 95%;
+        padding: 20px 15px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .add-todo-grid {
+        display: flex;
+        flex-direction: column; /* Mobilde alt alta girilsin */
+        gap: 15px;
+    }
+    .add-todo-input, .upload-area {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* 2. Video Oynatıcı Kontrollerini Ekrana Sığdır */
+    .custom-video-controls {
+        padding: 15px 10px 10px 10px; /* Yanlardan boşluğu kıstık */
+        gap: 8px; /* Öğeler arası boşluğu kıstık */
+    }
+    .custom-video-controls button {
+        font-size: 1.1rem; /* Butonları mobilde hafif küçült */
+    }
+    .video-time {
+        font-size: 0.75rem; /* Zaman yazısını küçült */
+    }
+
+    /* Sağda Tam Ekran butonunun taşmasını engellemek için */
+    .video-progress-bar {
+        margin: 0 5px;
+    }
+}
+
+.add-todo-modal h2 {
+    padding-right: 40px; /* Butonun genişliği kadar boşluk bırak */
+    box-sizing: border-box; /* Padding'in taşmasını engelle */
+}
+
+.lightbox-close, .slider-close-btn {
+    position: fixed !important; /* Kutuya değil direkt ekrana göre hizala */
+    top: 15px !important;
+    right: 15px !important;
+    z-index: 999999 !important; /* Videoların ve her şeyin üstünde kalmasını garantiler */
+    background: rgba(0, 0, 0, 0.5); /* Arkası karartılı olsun ki açık renk videolarda kaybolmasın */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ---- ALBÜM BAŞLIĞI - SADE VE KESİN ÇÖZÜM ---- */
+
+.album-header-box {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Satırlar arası boşluk */
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+/* Üst Satır: Butonlar köşelere yaslansın */
+.album-header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+/* Alt Satır: Yazılar ortalansın ve alta doğru uzasın */
+.album-header-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+.album-header-info .album-title {
+    width: 100%;
+    font-size: 1.5rem;
+    margin: 0 0 5px 0;
+    color: var(--text-main);
+    word-break: break-word; /* Sığmazsa alt satıra geç */
+    overflow-wrap: break-word;
+}
+
+.album-header-info .album-note {
+    width: 100%;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin: 0 0 5px 0;
+    word-break: break-word;
+}
+
+@media (max-width: 768px) {
+    .album-header-info .album-title { font-size: 1.25rem; }
+}

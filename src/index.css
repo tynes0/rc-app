@@ -1,0 +1,128 @@
+:root {
+    --bg-color: #0f172a;
+    --sidebar-bg: #1e293b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-color: #c084fc;
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+
+.light-theme {
+    --bg-color: #f8fafc;
+    --sidebar-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --accent-color: #a855f7;
+    --border-color: rgba(0, 0, 0, 0.1);
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+h1, h2, h3 {
+    margin-top: 0;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+}
+
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+}
+
+.main-content {
+    flex: 1;
+    padding: 40px;
+    overflow-x: hidden;
+    transition: padding 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding: 90px 20px 20px 20px;
+    }
+}
+
+/* ---- MODERN SCROLLBAR TASARIMI ---- */
+
+/* Webkit tarayıcılar (Chrome, Edge, Safari, Opera) için */
+::-webkit-scrollbar {
+    width: 10px; /* Çubuğun genişliği - İnce ve zarif */
+    height: 10px; /* Yatay scroll olursa yüksekliği */
+}
+
+/* Kaydırma yolu (Track) - Arka plan */
+::-webkit-scrollbar-track {
+    background: transparent; /* Arka planı şeffaf yapıyoruz ki içerik görünsün */
+    margin-block: 5px; /* Üstten ve alttan biraz boşluk bırak */
+}
+
+/* Kaydırma tutamacı (Thumb) - Hareket eden kısım */
+::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2); /* Yarı saydam beyaz/gri */
+    border-radius: 10px; /* Tamamen yuvarlak köşeler (Hap şeklinde) */
+    border: 3px solid transparent; /* Çubuğun etrafında boşluk hissi yaratmak için hile */
+    background-clip: content-box; /* Kenarlığın içini boyama, böylece etrafı boş kalır */
+    transition: background-color 0.3s ease;
+}
+
+/* Tutamacın üzerine gelince (Hover) */
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent-color); /* Temamızın ana rengiyle parlasın (Mor/Pembe) */
+}
+
+/* Firefox için standart destek (Daha az özelleştirilebilir ama uyumluluk için) */
+* {
+    scrollbar-width: thin; /* İnce çubuk */
+    /* İlk renk tutamaç, ikinci renk iz */
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}

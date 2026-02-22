@@ -1,0 +1,309 @@
+﻿/* Modal (Açılır Pencere) Arka Planı */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.85); /* Daha koyu, tok bir arka plan */
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+    padding: 20px;
+}
+
+/* YENİ MODAL İÇERİĞİ: Masaüstünde Yan Yana Layout */
+.modal-content {
+    background: var(--sidebar-bg);
+    color: var(--text-main);
+    width: 100%;
+    max-width: 850px; /* Daha geniş */
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: row; /* Solda resim, sağda içerik */
+    max-height: 90vh;
+}
+
+/* Şık ve Yumuşak Kapatma Butonu */
+.close-modal-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+}
+
+.close-modal-btn:hover {
+    background: #ef4444; /* Hover durumunda tatlı bir kırmızı */
+    color: white;
+    border-color: #ef4444;
+    transform: scale(1.1);
+}
+
+/* Sol Taraf: Afiş */
+.modal-left {
+    width: 40%;
+    flex-shrink: 0;
+    background: #000;
+}
+
+.modal-poster {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Sağ Taraf: İçerik ve Detaylar */
+.modal-right {
+    padding: 40px 30px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Yazı uzun olursa kendi içinde kaysın */
+}
+
+.modal-title {
+    margin: 0 0 15px 0;
+    font-size: 2.2rem;
+    color: var(--text-main);
+    line-height: 1.2;
+}
+.modal-title span {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.modal-meta {
+    display: flex;
+    gap: 15px;
+    color: var(--accent-color);
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    font-size: 0.95rem;
+    align-items: center;
+    font-weight: 500;
+}
+
+.modal-desc {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    color: #cbd5e1;
+}
+
+/* Sil Butonu */
+.modal-actions {
+    margin-top: auto; /* En alta iter */
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.delete-btn {
+    background: transparent;
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        flex-direction: column;
+        width: 95%;
+    }
+    .modal-left {
+        width: 100%;
+        height: 300px;
+    }
+    .modal-right {
+        padding: 25px 20px;
+    }
+    .modal-title {
+        font-size: 1.6rem;
+    }
+}
+
+/* ---- ÖZEL ONAY PENCERESİ (CONFIRM MODAL) ---- */
+.confirm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000; /* Detay modalının (1000) üstünde çıkması için yüksek verdik */
+    animation: fadeIn 0.2s ease;
+}
+
+.confirm-modal {
+    background: var(--sidebar-bg);
+    padding: 35px 30px;
+    border-radius: 20px;
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    color: var(--text-main);
+}
+
+.confirm-icon {
+    font-size: 3rem;
+    color: #ef4444;
+    margin-bottom: 15px;
+}
+
+.confirm-modal h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.4rem;
+}
+
+.confirm-modal p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin: 0 0 25px 0;
+    line-height: 1.5;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.confirm-btn {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.confirm-cancel {
+    background: transparent;
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+.confirm-cancel:hover {
+    background: var(--border-color);
+}
+
+.confirm-delete {
+    background: #ef4444;
+    color: white;
+}
+.confirm-delete:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* Sekmeler (Tabs) */
+.tabs-container {
+    display: inline-flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    background: var(--sidebar-bg);
+    padding: 8px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.tab-btn {
+    background: transparent !important; /* Global buton rengini ezer */
+    border: none !important;
+    color: var(--text-muted) !important;
+    padding: 10px 24px !important;
+    border-radius: 10px !important;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tab-btn:hover {
+    color: var(--text-main) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.tab-btn.active {
+    background: var(--accent-color) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(192, 132, 252, 0.4) !important;
+}
+
+/* Modal İçi İzleme Durumu Butonu */
+.watched-toggle-btn {
+    background: rgba(34, 197, 94, 0.1); /* Hafif yeşil arka plan */
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    margin-right: auto; /* Sil butonunu sağda bırakıp kendini sola yaslar */
+}
+
+.watched-toggle-btn:hover {
+    background: #22c55e;
+    color: white;
+}
+
+/* İzlenmişse (Geri al modu - Sarı tonlar) */
+.watched-toggle-btn.is-watched {
+    background: rgba(234, 179, 8, 0.1);
+    color: #eab308;
+    border-color: rgba(234, 179, 8, 0.3);
+}
+
+.watched-toggle-btn.is-watched:hover {
+    background: #eab308;
+    color: white;
+}
