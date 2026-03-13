@@ -6,21 +6,18 @@ import "./SearchMedia.css";
 const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
 export default function SearchMedia() {
-    // ARAMA VE FİLTRE STATE'LERİ
     const [query, setQuery] = useState("");
-    const [activeQuery, setActiveQuery] = useState(""); // Enter'a basılınca devreye giren asıl arama
+    const [activeQuery, setActiveQuery] = useState("");
     const [selectedGenre, setSelectedGenre] = useState("");
     const [genresList, setGenresList] = useState([]);
 
-    // API VERİ VE SAYFALAMA MOTORU STATE'LERİ
     const [tmdbResults, setTmdbResults] = useState([]);
     const [apiPage, setApiPage] = useState(1);
     const [hasMoreApiPages, setHasMoreApiPages] = useState(true);
     const [isSearching, setIsSearching] = useState(false);
 
-    // KULLANICI ARAYÜZÜ (LOKAL) SAYFALAMA STATE'LERİ
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(40); // VARSAYILAN 40 YAPILDI!
+    const [itemsPerPage, setItemsPerPage] = useState(40);
 
     const [existingInMovies, setExistingInMovies] = useState([]);
     const [existingInSeries, setExistingInSeries] = useState([]);
@@ -30,7 +27,6 @@ export default function SearchMedia() {
 
     const currentUser = localStorage.getItem("currentUser") || "Bilinmiyor";
 
-    // 1. İLK AÇILIŞ (Veritabanı Dinleme ve Türleri Çekme)
     useEffect(() => {
         const unsubMovies = onSnapshot(collection(db, "movies"), (snapshot) => setExistingInMovies(snapshot.docs.map(doc => doc.data().tmdbId || doc.data().id)));
         const unsubSeries = onSnapshot(collection(db, "series"), (snapshot) => setExistingInSeries(snapshot.docs.map(doc => doc.data().tmdbId || doc.data().id)));
@@ -46,7 +42,6 @@ export default function SearchMedia() {
 
     const allExistingMedia = [...existingInMovies, ...existingInSeries, ...existingInPool];
 
-    // 2. ANA API İSTEK FONKSİYONU
     const fetchApiData = async (pageNum, reset, currentQuery, currentGenre) => {
         setIsSearching(true);
         try {
@@ -54,13 +49,11 @@ export default function SearchMedia() {
             let totalPagesFromApi = 1;
 
             if (currentQuery !== "") {
-                // Arama yapılıyorsa
                 const response = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&language=tr-TR&query=${currentQuery}&page=${pageNum}`);
                 const data = await response.json();
                 newResults = data.results;
                 totalPagesFromApi = data.total_pages;
             } else if (currentGenre !== "") {
-                // Tür tavsiyesi isteniyorsa
                 const [movieRes, tvRes] = await Promise.all([
                     fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_API_KEY}&language=tr-TR&with_genres=${currentGenre}&sort_by=popularity.desc&page=${pageNum}`),
                     fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${TMDB_API_KEY}&language=tr-TR&with_genres=${currentGenre}&sort_by=popularity.desc&page=${pageNum}`)
@@ -73,59 +66,48 @@ export default function SearchMedia() {
                 newResults = [...movies, ...tvs].sort((a, b) => b.popularity - a.popularity);
                 totalPagesFromApi = Math.max(movieData.total_pages || 1, tvData.total_pages || 1);
             } else {
-                // Hiçbir şey yoksa Haftanın Popülerleri
                 const response = await fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${TMDB_API_KEY}&language=tr-TR&page=${pageNum}`);
                 const data = await response.json();
                 newResults = data.results;
                 totalPagesFromApi = data.total_pages;
             }
 
-            // Sadece afişi olan dizi ve filmleri filtrele
             const filtered = newResults.filter(item => (item.media_type === 'movie' || item.media_type === 'tv') && item.poster_path);
 
             setTmdbResults(prev => {
                 const combined = reset ? filtered : [...prev, ...filtered];
-                // Aynı filmin 2 kere gelmesini engelle
                 const uniqueMap = new Map();
                 combined.forEach(item => uniqueMap.set(item.id, item));
                 return Array.from(uniqueMap.values());
             });
 
-            // TMDb'de genelde maksimum 500 sayfa limiti vardır
             setHasMoreApiPages(pageNum < totalPagesFromApi && pageNum < 500);
             setApiPage(pageNum);
         } catch (error) { console.error("API Hatası:", error); }
         setIsSearching(false);
     };
 
-    // Arama, Enter veya Filtre değiştiğinde sistemi sıfırla ve yeni veriyi çek
     useEffect(() => {
         setCurrentPage(1);
         fetchApiData(1, true, activeQuery, selectedGenre);
     }, [activeQuery, selectedGenre]);
 
-    // LOKAL FİLTRELEME (Eğer arama ile birlikte tür de seçilmişse yerel olarak süz)
     const displayedResults = tmdbResults.filter(item => {
-        // Tavsiye modundaysak API zaten filtreledi, dokunma. Sadece "Arama + Filtre" birleşimi ise devreye gir.
         if (!selectedGenre || activeQuery === "") return true;
         return item.genre_ids && item.genre_ids.includes(Number(selectedGenre));
     });
 
     const localTotalPages = Math.max(1, Math.ceil(displayedResults.length / itemsPerPage));
 
-    // ✨ OTOMATİK SAYFALAMA MOTORU (Sihrin Olduğu Yer)
-    // Eğer sayfada göstermek istediğimiz 40 veya 100 ise ve elimizde yeterli veri yoksa, 
-    // veya son sayfadaysak arka planda API'den diğer sayfaları çeker.
     useEffect(() => {
         const timer = setTimeout(() => {
             if (currentPage >= localTotalPages && hasMoreApiPages && !isSearching && tmdbResults.length > 0) {
                 fetchApiData(apiPage + 1, false, activeQuery, selectedGenre);
             }
-        }, 150); // Çift tetiklenmeyi önlemek için kısa gecikme
+        }, 150);
         return () => clearTimeout(timer);
     }, [currentPage, localTotalPages, hasMoreApiPages, isSearching, tmdbResults.length, apiPage, activeQuery, selectedGenre]);
 
-    // Sayfalama Dilimlemesi
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = displayedResults.slice(indexOfFirstItem, indexOfLastItem);
@@ -138,7 +120,6 @@ export default function SearchMedia() {
         setActiveQuery(query.trim());
     };
 
-    // Modal Detay Fonksiyonları (Eskisiyle aynı)
     const fetchExactDetails = async (mediaType, id) => {
         try {
             const response = await fetch(`https://api.themoviedb.org/3/${mediaType}/${id}?api_key=${TMDB_API_KEY}&language=tr-TR`);
@@ -220,7 +201,6 @@ export default function SearchMedia() {
                         value={query}
                         onChange={(e) => {
                             setQuery(e.target.value);
-                            // Kutu tamamen boşaltılırsa aramayı sıfırla
                             if(e.target.value === "") setActiveQuery("");
                         }}
                         className="search-input"
@@ -245,7 +225,6 @@ export default function SearchMedia() {
                 </div>
             </div>
 
-            {/* SAYFA BAŞINA GÖSTERİM AYARI */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '15px', padding: '0 10px', maxWidth: '800px', margin: '0 auto 15px auto' }}>
                 <label style={{ color: 'var(--text-muted)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <i className="fa-solid fa-layer-group"></i> Sayfada Göster:
@@ -262,14 +241,12 @@ export default function SearchMedia() {
                 </label>
             </div>
 
-            {/* DİNAMİK BAŞLIK BİLGİSİ */}
             <div style={{marginBottom: "15px", fontWeight: "bold", color: "var(--text-main)", display: "flex", alignItems: "center", gap: "10px"}}>
                 {activeQuery !== "" ? <><i className="fa-solid fa-list-ul"></i> Arama Sonuçları {selectedGenre && "(Türe Göre Filtrelendi)"}</>
                     : selectedGenre ? <><i className="fa-solid fa-wand-magic-sparkles" style={{color: "var(--accent-color)"}}></i> Tür Tavsiyeleri</>
                         : <><i className="fa-solid fa-fire" style={{color: "#ef4444"}}></i> Haftanın Popülerleri</>}
             </div>
 
-            {/* KARTLARIN EKRANA BASILMASI */}
             {currentItems.length === 0 && !isSearching ? (
                 <p style={{textAlign: "center", color: "var(--text-muted)", padding: "40px 0"}}>Bu kriterlere uygun sonuç bulunamadı.</p>
             ) : (
@@ -308,8 +285,7 @@ export default function SearchMedia() {
                     })}
                 </div>
             )}
-
-            {/* YENİ: SÜREKLİ SAYFALAMA KONTROLLERİ */}
+            
             {(hasMoreApiPages || localTotalPages > 1) && (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '30px', paddingBottom: '20px' }}>
                     <button onClick={prevPage} disabled={currentPage === 1 || isSearching} className="pagination-btn">
@@ -326,7 +302,6 @@ export default function SearchMedia() {
                 </div>
             )}
 
-            {/* MODAL PENCERESİ */}
             {selectedDetail && (
                 <div className="modal-overlay" onClick={() => setSelectedDetail(null)}>
                     <div className="media-detail-modal" onClick={(e) => e.stopPropagation()}>

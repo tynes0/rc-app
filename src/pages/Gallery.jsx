@@ -36,7 +36,6 @@ export default function Gallery() {
     const [photoDate, setPhotoDate] = useState("");
     const [newAlbumName, setNewAlbumName] = useState("");
 
-    // YENİ: Artık resim objesini değil, index'ini (sırasını) tutuyoruz
     const [lightboxIndex, setLightboxIndex] = useState(null);
     const [itemToDelete, setItemToDelete] = useState(null);
 
@@ -46,7 +45,7 @@ export default function Gallery() {
     const touchEndX = useRef(0);
 
     const CustomVideoPlayer = ({ src, className }) => {
-        const wrapperRef = useRef(null); // YENİ: Kutuyu tam ekran yapmak için referans
+        const wrapperRef = useRef(null);
         const videoRef = useRef(null);
 
         const [isPlaying, setIsPlaying] = useState(false);
@@ -56,9 +55,8 @@ export default function Gallery() {
         const [volume, setVolume] = useState(1);
         const [isMuted, setIsMuted] = useState(false);
 
-        const [isFullscreen, setIsFullscreen] = useState(false); // YENİ: Tam ekran state'i
+        const [isFullscreen, setIsFullscreen] = useState(false);
 
-        // ESC tuşu ile çıkılırsa ikonun değişmesi için tarayıcıyı dinliyoruz
         useEffect(() => {
             const handleFullscreenChange = () => {
                 setIsFullscreen(!!document.fullscreenElement);
