@@ -6,14 +6,21 @@ import "./SearchMedia.css";
 const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
 export default function SearchMedia() {
+    // ARAMA VE FİLTRE STATE'LERİ
     const [query, setQuery] = useState("");
-    const [results, setResults] = useState([]);
-    const [isSearching, setIsSearching] = useState(false);
-    const [isShowingPopular, setIsShowingPopular] = useState(true);
-
-    // YENİ: Türler (Genres) State'leri
-    const [genresList, setGenresList] = useState([]);
+    const [activeQuery, setActiveQuery] = useState(""); // Enter'a basılınca devreye giren asıl arama
     const [selectedGenre, setSelectedGenre] = useState("");
+    const [genresList, setGenresList] = useState([]);
+
+    // API VERİ VE SAYFALAMA MOTORU STATE'LERİ
+    const [tmdbResults, setTmdbResults] = useState([]);
+    const [apiPage, setApiPage] = useState(1);
+    const [hasMoreApiPages, setHasMoreApiPages] = useState(true);
+    const [isSearching, setIsSearching] = useState(false);
+
+    // KULLANICI ARAYÜZÜ (LOKAL) SAYFALAMA STATE'LERİ
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(40); // VARSAYILAN 40 YAPILDI!
 
     const [existingInMovies, setExistingInMovies] = useState([]);
     const [existingInSeries, setExistingInSeries] = useState([]);
@@ -23,14 +30,12 @@ export default function SearchMedia() {
 
     const currentUser = localStorage.getItem("currentUser") || "Bilinmiyor";
 
-    // 1. Veritabanını ve TMDb Tür Listesini Dinle
+    // 1. İLK AÇILIŞ (Veritabanı Dinleme ve Türleri Çekme)
     useEffect(() => {
-        // Firebase Dinlemeleri
         const unsubMovies = onSnapshot(collection(db, "movies"), (snapshot) => setExistingInMovies(snapshot.docs.map(doc => doc.data().tmdbId || doc.data().id)));
         const unsubSeries = onSnapshot(collection(db, "series"), (snapshot) => setExistingInSeries(snapshot.docs.map(doc => doc.data().tmdbId || doc.data().id)));
         const unsubPool = onSnapshot(collection(db, "pool"), (snapshot) => setExistingInPool(snapshot.docs.map(doc => doc.data().tmdbId || doc.data().id)));
 
-        // YENİ: TMDb'den Film Türlerini Çek (Tavsiye motoru için)
         fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${TMDB_API_KEY}&language=tr-TR`)
             .then(res => res.json())
             .then(data => setGenresList(data.genres || []))
@@ -41,67 +46,99 @@ export default function SearchMedia() {
 
     const allExistingMedia = [...existingInMovies, ...existingInSeries, ...existingInPool];
 
-    // 2. Arama Kutusuna veya Tür Seçimine Göre İçerik Getir
+    // 2. ANA API İSTEK FONKSİYONU
+    const fetchApiData = async (pageNum, reset, currentQuery, currentGenre) => {
+        setIsSearching(true);
+        try {
+            let newResults = [];
+            let totalPagesFromApi = 1;
+
+            if (currentQuery !== "") {
+                // Arama yapılıyorsa
+                const response = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&language=tr-TR&query=${currentQuery}&page=${pageNum}`);
+                const data = await response.json();
+                newResults = data.results;
+                totalPagesFromApi = data.total_pages;
+            } else if (currentGenre !== "") {
+                // Tür tavsiyesi isteniyorsa
+                const [movieRes, tvRes] = await Promise.all([
+                    fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_API_KEY}&language=tr-TR&with_genres=${currentGenre}&sort_by=popularity.desc&page=${pageNum}`),
+                    fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${TMDB_API_KEY}&language=tr-TR&with_genres=${currentGenre}&sort_by=popularity.desc&page=${pageNum}`)
+                ]);
+                const movieData = await movieRes.json();
+                const tvData = await tvRes.json();
+                const movies = movieData.results.map(m => ({...m, media_type: 'movie'}));
+                const tvs = tvData.results.map(t => ({...t, media_type: 'tv'}));
+
+                newResults = [...movies, ...tvs].sort((a, b) => b.popularity - a.popularity);
+                totalPagesFromApi = Math.max(movieData.total_pages || 1, tvData.total_pages || 1);
+            } else {
+                // Hiçbir şey yoksa Haftanın Popülerleri
+                const response = await fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${TMDB_API_KEY}&language=tr-TR&page=${pageNum}`);
+                const data = await response.json();
+                newResults = data.results;
+                totalPagesFromApi = data.total_pages;
+            }
+
+            // Sadece afişi olan dizi ve filmleri filtrele
+            const filtered = newResults.filter(item => (item.media_type === 'movie' || item.media_type === 'tv') && item.poster_path);
+
+            setTmdbResults(prev => {
+                const combined = reset ? filtered : [...prev, ...filtered];
+                // Aynı filmin 2 kere gelmesini engelle
+                const uniqueMap = new Map();
+                combined.forEach(item => uniqueMap.set(item.id, item));
+                return Array.from(uniqueMap.values());
+            });
+
+            // TMDb'de genelde maksimum 500 sayfa limiti vardır
+            setHasMoreApiPages(pageNum < totalPagesFromApi && pageNum < 500);
+            setApiPage(pageNum);
+        } catch (error) { console.error("API Hatası:", error); }
+        setIsSearching(false);
+    };
+
+    // Arama, Enter veya Filtre değiştiğinde sistemi sıfırla ve yeni veriyi çek
     useEffect(() => {
-        if (selectedGenre !== "") {
-            fetchRecommendationsByGenre(selectedGenre);
-        } else if (query === "") {
-            fetchPopular();
-        }
-    }, [query, selectedGenre]);
+        setCurrentPage(1);
+        fetchApiData(1, true, activeQuery, selectedGenre);
+    }, [activeQuery, selectedGenre]);
 
-    const fetchPopular = async () => {
-        setIsSearching(true);
-        try {
-            const response = await fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${TMDB_API_KEY}&language=tr-TR`);
-            const data = await response.json();
-            setResults(data.results.filter(item => (item.media_type === 'movie' || item.media_type === 'tv') && item.poster_path));
-            setIsShowingPopular(true);
-        } catch (error) { console.error(error); }
-        setIsSearching(false);
-    };
+    // LOKAL FİLTRELEME (Eğer arama ile birlikte tür de seçilmişse yerel olarak süz)
+    const displayedResults = tmdbResults.filter(item => {
+        // Tavsiye modundaysak API zaten filtreledi, dokunma. Sadece "Arama + Filtre" birleşimi ise devreye gir.
+        if (!selectedGenre || activeQuery === "") return true;
+        return item.genre_ids && item.genre_ids.includes(Number(selectedGenre));
+    });
 
-    // YENİ: Türe Göre Tavsiye Motoru (Discover API)
-    const fetchRecommendationsByGenre = async (genreId) => {
-        setIsSearching(true);
-        setIsShowingPopular(false);
-        try {
-            // Hem film hem dizi için discover yapıp birleştiriyoruz ki zengin sonuç çıksın
-            const [movieRes, tvRes] = await Promise.all([
-                fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_API_KEY}&language=tr-TR&with_genres=${genreId}&sort_by=popularity.desc`),
-                fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${TMDB_API_KEY}&language=tr-TR&with_genres=${genreId}&sort_by=popularity.desc`)
-            ]);
+    const localTotalPages = Math.max(1, Math.ceil(displayedResults.length / itemsPerPage));
 
-            const movieData = await movieRes.json();
-            const tvData = await tvRes.json();
+    // ✨ OTOMATİK SAYFALAMA MOTORU (Sihrin Olduğu Yer)
+    // Eğer sayfada göstermek istediğimiz 40 veya 100 ise ve elimizde yeterli veri yoksa, 
+    // veya son sayfadaysak arka planda API'den diğer sayfaları çeker.
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (currentPage >= localTotalPages && hasMoreApiPages && !isSearching && tmdbResults.length > 0) {
+                fetchApiData(apiPage + 1, false, activeQuery, selectedGenre);
+            }
+        }, 150); // Çift tetiklenmeyi önlemek için kısa gecikme
+        return () => clearTimeout(timer);
+    }, [currentPage, localTotalPages, hasMoreApiPages, isSearching, tmdbResults.length, apiPage, activeQuery, selectedGenre]);
 
-            // Medya türlerini manuel ekleyip popülerliğe göre birleştiriyoruz
-            const movies = movieData.results.map(m => ({...m, media_type: 'movie'}));
-            const tvs = tvData.results.map(t => ({...t, media_type: 'tv'}));
+    // Sayfalama Dilimlemesi
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = displayedResults.slice(indexOfFirstItem, indexOfLastItem);
 
-            const combined = [...movies, ...tvs]
-                .filter(item => item.poster_path)
-                .sort((a, b) => b.popularity - a.popularity); // En popülerler en üste
+    const nextPage = () => setCurrentPage(prev => prev + 1);
+    const prevPage = () => setCurrentPage(prev => (prev > 1 ? prev - 1 : prev));
 
-            setResults(combined);
-        } catch (error) { console.error("Tavsiye hatası:", error); }
-        setIsSearching(false);
-    };
-
-    const handleSearch = async (e) => {
+    const handleSearch = (e) => {
         e.preventDefault();
-        if (!query.trim()) return;
-        setIsSearching(true);
-        setIsShowingPopular(false);
-        setSelectedGenre(""); // Arama yapılıyorsa tür filtresini sıfırla
-        try {
-            const response = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&language=tr-TR&query=${query}&page=1`);
-            const data = await response.json();
-            setResults(data.results.filter(item => (item.media_type === 'movie' || item.media_type === 'tv') && item.poster_path));
-        } catch (error) { console.error(error); }
-        setIsSearching(false);
+        setActiveQuery(query.trim());
     };
 
+    // Modal Detay Fonksiyonları (Eskisiyle aynı)
     const fetchExactDetails = async (mediaType, id) => {
         try {
             const response = await fetch(`https://api.themoviedb.org/3/${mediaType}/${id}?api_key=${TMDB_API_KEY}&language=tr-TR`);
@@ -147,7 +184,6 @@ export default function SearchMedia() {
                 addedBy: currentUser,
                 mediaType: type,
                 createdAt: Date.now(),
-                // YENİ: Türleri objelerin isimleri olarak dizi halinde kaydet
                 genres: advancedData && advancedData.genres ? advancedData.genres.map(g => g.name) : []
             };
 
@@ -176,77 +212,167 @@ export default function SearchMedia() {
                 <p>Aradığın yapımı bul veya tür seçerek yeni maceralar keşfet.</p>
             </div>
 
-            {/* YENİ: Arama ve Filtreleme Alanı */}
-            <div className="search-filter-wrapper" style={{display: 'flex', gap: '10px', maxWidth: '800px', margin: '0 auto 30px auto', flexWrap: 'wrap'}}>
+            <div className="search-filter-wrapper" style={{display: 'flex', gap: '10px', maxWidth: '800px', margin: '0 auto 15px auto', flexWrap: 'wrap'}}>
                 <form onSubmit={handleSearch} className="search-form" style={{flex: '1', minWidth: '300px', margin: 0}}>
-                    <input type="text" placeholder="Film veya dizi adı yazın..." value={query} onChange={(e) => { setQuery(e.target.value); if(e.target.value === "") setSelectedGenre(""); }} className="search-input" />
-                    <button type="submit" className="search-btn" disabled={isSearching}>
-                        {isSearching && !selectedGenre ? <i className="fa-solid fa-spinner fa-spin"></i> : <i className="fa-solid fa-magnifying-glass"></i>} Ara
+                    <input
+                        type="text"
+                        placeholder="Film veya dizi adı yazın..."
+                        value={query}
+                        onChange={(e) => {
+                            setQuery(e.target.value);
+                            // Kutu tamamen boşaltılırsa aramayı sıfırla
+                            if(e.target.value === "") setActiveQuery("");
+                        }}
+                        className="search-input"
+                    />
+                    <button type="submit" className="search-btn" disabled={isSearching && activeQuery === query}>
+                        {isSearching && activeQuery === query ? <i className="fa-solid fa-spinner fa-spin"></i> : <i className="fa-solid fa-magnifying-glass"></i>} Ara
                     </button>
                 </form>
 
-                {/* YENİ: Tür Seçimi (Dropdown) */}
-                <div style={{flex: '0 1 200px', minWidth: '150px'}}>
+                <div className="custom-select-wrapper">
                     <select
-                        className="search-input"
-                        style={{width: '100%', cursor: 'pointer', appearance: 'auto'}}
+                        className="search-input custom-select"
                         value={selectedGenre}
-                        onChange={(e) => {
-                            setSelectedGenre(e.target.value);
-                            if(e.target.value !== "") setQuery(""); // Tür seçilince yazılı aramayı sıfırla
-                        }}
+                        onChange={(e) => setSelectedGenre(e.target.value)}
                     >
-                        <option value="">🎭 Tür Seç / Filtrele</option>
+                        <option value="">{selectedGenre ? "❌ Filtreyi Kaldır" : "🎭 Tür Seç / Filtrele"}</option>
                         {genresList.map(genre => (
                             <option key={genre.id} value={genre.id}>{genre.name}</option>
                         ))}
                     </select>
+                    <i className="fa-solid fa-chevron-down select-arrow"></i>
                 </div>
             </div>
 
-            <div style={{marginBottom: "15px", fontWeight: "bold", color: "var(--text-main)", display: "flex", alignItems: "center", gap: "10px"}}>
-                {selectedGenre ? <><i className="fa-solid fa-wand-magic-sparkles" style={{color: "var(--accent-color)"}}></i> Tür Tavsiyeleri</>
-                    : isShowingPopular ? <><i className="fa-solid fa-fire" style={{color: "#ef4444"}}></i> Haftanın Popülerleri</>
-                        : <><i className="fa-solid fa-list-ul"></i> Arama Sonuçları</>}
+            {/* SAYFA BAŞINA GÖSTERİM AYARI */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '15px', padding: '0 10px', maxWidth: '800px', margin: '0 auto 15px auto' }}>
+                <label style={{ color: 'var(--text-muted)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i className="fa-solid fa-layer-group"></i> Sayfada Göster:
+                    <select
+                        value={itemsPerPage}
+                        onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+                        style={{ background: 'var(--sidebar-bg)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '5px', padding: '5px', outline: 'none' }}
+                    >
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={40}>40</option>
+                        <option value={100}>100</option>
+                    </select>
+                </label>
             </div>
 
-            {/* Kartlar ve Modal Render Kodları Aynı Kalacak (Aşağıdaki grid map ve Modal kodları mevcut haliyle durabilir) */}
-            <div className="search-results-grid">
-                {results.map((item) => {
-                    const isAlreadyAdded = allExistingMedia.includes(item.id);
+            {/* DİNAMİK BAŞLIK BİLGİSİ */}
+            <div style={{marginBottom: "15px", fontWeight: "bold", color: "var(--text-main)", display: "flex", alignItems: "center", gap: "10px"}}>
+                {activeQuery !== "" ? <><i className="fa-solid fa-list-ul"></i> Arama Sonuçları {selectedGenre && "(Türe Göre Filtrelendi)"}</>
+                    : selectedGenre ? <><i className="fa-solid fa-wand-magic-sparkles" style={{color: "var(--accent-color)"}}></i> Tür Tavsiyeleri</>
+                        : <><i className="fa-solid fa-fire" style={{color: "#ef4444"}}></i> Haftanın Popülerleri</>}
+            </div>
 
-                    return (
-                        <div key={item.id} className="search-card" onClick={() => openDetailsModal(item)}>
-                            <div className="search-card-img-wrapper">
-                                <img src={`https://image.tmdb.org/t/p/w500${item.poster_path}`} alt={item.title || item.name} className="search-card-img" />
-                                <div className="click-to-view-overlay"><i className="fa-solid fa-circle-info"></i> Detaylar</div>
-                            </div>
+            {/* KARTLARIN EKRANA BASILMASI */}
+            {currentItems.length === 0 && !isSearching ? (
+                <p style={{textAlign: "center", color: "var(--text-muted)", padding: "40px 0"}}>Bu kriterlere uygun sonuç bulunamadı.</p>
+            ) : (
+                <div className="search-results-grid">
+                    {currentItems.map((item) => {
+                        const isAlreadyAdded = allExistingMedia.includes(item.id);
 
-                            <div className="search-card-info">
-                                <div className="search-card-meta">
-                                    <span className={`media-badge ${item.media_type || 'movie'}`}>{item.media_type === 'tv' ? 'Dizi' : 'Film'}</span>
-                                    <span className="media-rating"><i className="fa-solid fa-star" style={{color: '#fbbf24'}}></i> {item.vote_average?.toFixed(1)}</span>
+                        return (
+                            <div key={item.id} className="search-card" onClick={() => openDetailsModal(item)}>
+                                <div className="search-card-img-wrapper">
+                                    <img src={`https://image.tmdb.org/t/p/w500${item.poster_path}`} alt={item.title || item.name} className="search-card-img" />
+                                    <div className="click-to-view-overlay"><i className="fa-solid fa-circle-info"></i> Detaylar</div>
                                 </div>
-                                <h4 className="search-card-title">{item.title || item.name}</h4>
-                                <p className="search-card-date">{(item.release_date || item.first_air_date)?.substring(0, 4)}</p>
 
-                                <div className="search-card-actions">
-                                    {isAlreadyAdded ? (
-                                        <button className="added-btn" disabled onClick={(e) => e.stopPropagation()}><i className="fa-solid fa-check-double"></i> Zaten Eklendi</button>
+                                <div className="search-card-info">
+                                    <div className="search-card-meta">
+                                        <span className={`media-badge ${item.media_type || 'movie'}`}>{item.media_type === 'tv' ? 'Dizi' : 'Film'}</span>
+                                        <span className="media-rating"><i className="fa-solid fa-star" style={{color: '#fbbf24'}}></i> {item.vote_average?.toFixed(1)}</span>
+                                    </div>
+                                    <h4 className="search-card-title">{item.title || item.name}</h4>
+                                    <p className="search-card-date">{(item.release_date || item.first_air_date)?.substring(0, 4)}</p>
+
+                                    <div className="search-card-actions">
+                                        {isAlreadyAdded ? (
+                                            <button className="added-btn" disabled onClick={(e) => e.stopPropagation()}><i className="fa-solid fa-check-double"></i> Zaten Eklendi</button>
+                                        ) : (
+                                            <>
+                                                <button className="add-pool-btn" onClick={(e) => handleAdd(item, 'pool', e)}><i className="fa-solid fa-droplet"></i> Havuza</button>
+                                                <button className="add-list-btn" onClick={(e) => handleAdd(item, 'liste', e)}><i className="fa-solid fa-list-check"></i> Listeye</button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* YENİ: SÜREKLİ SAYFALAMA KONTROLLERİ */}
+            {(hasMoreApiPages || localTotalPages > 1) && (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '30px', paddingBottom: '20px' }}>
+                    <button onClick={prevPage} disabled={currentPage === 1 || isSearching} className="pagination-btn">
+                        <i className="fa-solid fa-chevron-left"></i> Önceki
+                    </button>
+
+                    <span style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>
+                        Sayfa {currentPage}
+                    </span>
+
+                    <button onClick={nextPage} disabled={(!hasMoreApiPages && currentPage >= localTotalPages) || isSearching} className="pagination-btn">
+                        {isSearching && currentPage >= localTotalPages ? <i className="fa-solid fa-spinner fa-spin"></i> : "Sonraki"} <i className="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            )}
+
+            {/* MODAL PENCERESİ */}
+            {selectedDetail && (
+                <div className="modal-overlay" onClick={() => setSelectedDetail(null)}>
+                    <div className="media-detail-modal" onClick={(e) => e.stopPropagation()}>
+                        <button className="close-modal-btn" onClick={() => setSelectedDetail(null)}>
+                            <i className="fa-solid fa-xmark"></i>
+                        </button>
+                        <div className="media-detail-content">
+                            <img src={`https://image.tmdb.org/t/p/w500${selectedDetail.poster_path}`} alt="Afiş" className="media-detail-poster" />
+                            <div className="media-detail-info">
+                                <h2>{selectedDetail.title || selectedDetail.name}</h2>
+                                <div className="media-detail-tags">
+                                    <span className="detail-tag rating"><i className="fa-solid fa-star"></i> {selectedDetail.vote_average?.toFixed(1)}</span>
+                                    <span className="detail-tag year"><i className="fa-regular fa-calendar"></i> {(selectedDetail.release_date || selectedDetail.first_air_date)?.substring(0, 4)}</span>
+                                    <span className="detail-tag duration">
+                                        <i className="fa-regular fa-clock"></i> {isDetailLoading ? "Hesaplanıyor..." : (selectedDetail.exactDuration || "Bilinmiyor")}
+                                    </span>
+                                    {selectedDetail.seasons && (
+                                        <span className="detail-tag seasons">
+                                            <i className="fa-solid fa-list-ol"></i> {selectedDetail.seasons} Sezon • {selectedDetail.episodes} Bölüm
+                                        </span>
+                                    )}
+                                </div>
+                                {!isDetailLoading && selectedDetail.genres && (
+                                    <div className="media-genres">
+                                        {selectedDetail.genres.map(g => <span key={g.id} className="genre-pill">{g.name}</span>)}
+                                    </div>
+                                )}
+                                <div className="media-detail-overview">
+                                    <h4>Özet</h4>
+                                    <p>{selectedDetail.overview || "Bu yapım için henüz Türkçe özet bulunmuyor."}</p>
+                                </div>
+                                <div className="media-detail-actions">
+                                    {allExistingMedia.includes(selectedDetail.id) ? (
+                                        <button className="added-btn" disabled style={{width: "100%"}}><i className="fa-solid fa-check-double"></i> Bu yapım zaten listelerde mevcut</button>
                                     ) : (
                                         <>
-                                            <button className="add-pool-btn" onClick={(e) => handleAdd(item, 'pool', e)}><i className="fa-solid fa-droplet"></i> Havuza</button>
-                                            <button className="add-list-btn" onClick={(e) => handleAdd(item, 'liste', e)}><i className="fa-solid fa-list-check"></i> Listeye</button>
+                                            <button className="add-pool-btn" onClick={() => handleAdd(selectedDetail, 'pool')}><i className="fa-solid fa-droplet"></i> Havuza Ekle</button>
+                                            <button className="add-list-btn" onClick={() => handleAdd(selectedDetail, 'liste')}><i className="fa-solid fa-list-check"></i> Doğrudan Listeye</button>
                                         </>
                                     )}
                                 </div>
                             </div>
                         </div>
-                    );
-                })}
-            </div>
-
-            {/* BURAYA ÖNCEKİ MESAJDAKİ MODAL KODUNU KOYABİLİRSİN (selectedDetail) */}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

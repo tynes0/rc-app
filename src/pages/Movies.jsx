@@ -12,19 +12,16 @@ export default function Movies() {
     const [selectedMovie, setSelectedMovie] = useState(null);
     const [itemToDelete, setItemToDelete] = useState(null);
 
-    // 1. BULUTTAN VERİLERİ CANLI CANLI ÇEKME (onSnapshot)
     useEffect(() => {
         const unsub = onSnapshot(collection(db, "movies"), (snapshot) => {
             const moviesList = snapshot.docs.map(doc => ({
                 ...doc.data(),
-                firebaseId: doc.id // Silme ve Güncelleme işlemleri için gerçek ID
+                firebaseId: doc.id
             }));
 
-            // İstersen sadece "movie" olanları filtreleyebilirsin, 
-            // ama dizi sayfan yoksa hepsi burada durabilir.
             const onlyMovies = moviesList.filter(m => m.mediaType !== 'tv');
 
-            setMovies(onlyMovies.length > 0 ? onlyMovies : moviesList); // Şimdilik esneklik için
+            setMovies(onlyMovies.length > 0 ? onlyMovies : moviesList); 
             setLoading(false);
         }, (error) => {
             console.error("Filmler çekilirken hata oluştu: ", error);
@@ -50,22 +47,21 @@ export default function Movies() {
         }
     };
 
-    const handleDeleteClick = (firebaseId) => {
-        setItemToDelete(firebaseId);
+    const handleDeleteClick = () => {
+        setItemToDelete(true);
     };
 
-    // 3. BULUTTAN FİLMİ TAMAMEN SİLME (Gerçek Firebase ID ile)
     const confirmDelete = async () => {
-        const idToDelete = itemToDelete;
+        const targetId = selectedMovie.firebaseId;
 
-        // Pencereleri kapat
-        setItemToDelete(null);
+        setItemToDelete(false);
         setSelectedMovie(null);
 
-        // Firebase'den sil
+        if (!targetId) return;
+
         try {
-            await deleteDoc(doc(db, "movies", idToDelete));
-            // onSnapshot sayesinde liste anında kendi kendini güncelleyecek
+            await deleteDoc(doc(db, "movies", targetId.toString()));
+            console.log("Film başarıyla silindi!");
         } catch (error) {
             console.error("Silinirken hata oluştu:", error);
         }
@@ -78,22 +74,18 @@ export default function Movies() {
     });
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10); // Varsayılan 10 film göster
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    // Sekme veya sayfa boyutu değiştiğinde 1. sayfaya dön
     useEffect(() => {
         setCurrentPage(1);
     }, [activeTab, itemsPerPage]);
 
-    // O anki sayfada gösterilecek filmleri hesapla
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = displayedMovies.slice(indexOfFirstItem, indexOfLastItem);
 
     const totalPages = Math.ceil(displayedMovies.length / itemsPerPage);
 
-    // Sayfa değiştirme fonksiyonları
-    const paginate = (pageNumber) => setCurrentPage(pageNumber);
     const nextPage = () => setCurrentPage(prev => (prev < totalPages ? prev + 1 : prev));
     const prevPage = () => setCurrentPage(prev => (prev > 1 ? prev - 1 : prev));
 
@@ -200,7 +192,7 @@ export default function Movies() {
                                     <i className={`fa-solid ${selectedMovie.isWatched ? 'fa-rotate-left' : 'fa-check'}`}></i>
                                     {selectedMovie.isWatched ? "Geri Al" : "İzledim"}
                                 </button>
-                                <button className="delete-btn" onClick={() => handleDeleteClick(selectedMovie.firebaseId)}>
+                                <button className="delete-btn" onClick={handleDeleteClick}>
                                     <i className="fa-solid fa-trash-can"></i> Listeden Sil
                                 </button>
                             </div>

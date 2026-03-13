@@ -49,15 +49,22 @@ export default function Series() {
 
     // 3. BULUTTAN DİZİYİ SİLME
     const confirmDelete = async () => {
-        const idToDelete = itemToDelete; // Bu artık firebaseId'yi tutuyor
+        const targetId = selectedSeries?.firebaseId;
 
-        setItemToDelete(null);
-        setSelectedSeries(null); // Kendi modal state ismin neyse o
+        if (!targetId) {
+            alert("Hata: Bu dizinin bir Firebase ID'si yok! Muhtemelen eski bir kayıt.");
+            setItemToDelete(false);
+            return;
+        }
 
         try {
-            await deleteDoc(doc(db, "series", idToDelete)); // id yerine idToDelete (firebaseId)
+            await deleteDoc(doc(db, "series", targetId.toString()));
+            console.log("Dizi başarıyla silindi!");
+
+            setItemToDelete(false);
+            setSelectedSeries(null);
         } catch (error) {
-            console.error("Silinirken hata:", error);
+            console.error("Silinirken Firebase'de hata oluştu:", error);
         }
     };
 
@@ -125,14 +132,14 @@ export default function Series() {
                                 <button
                                     className={`watched-toggle-btn ${selectedSeries.isWatched ? 'is-watched' : ''}`}
                                     onClick={() => {
-                                        toggleWatchedStatus(selectedSeries.id);
+                                        toggleWatchedStatus(selectedSeries.firebaseId);
                                         setSelectedSeries({...selectedSeries, isWatched: !selectedSeries.isWatched});
                                     }}
                                 >
                                     <i className={`fa-solid ${selectedSeries.isWatched ? 'fa-rotate-left' : 'fa-check'}`}></i>
                                     {selectedSeries.isWatched ? "Geri Al" : "İzledim"}
                                 </button>
-                                <button className="delete-btn" onClick={() => handleDeleteClick(selectedSeries.id)}>
+                                <button className="delete-btn" onClick={() => handleDeleteClick(selectedSeries.firebaseId)}> {/* DÜZELTİLDİ */}
                                     <i className="fa-solid fa-trash-can"></i> Listeden Sil
                                 </button>
                             </div>

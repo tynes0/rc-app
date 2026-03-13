@@ -278,3 +278,46 @@
         flex-direction: column;
     }
 }
+
+/* ---- CUSTOM SELECT (ÖZEL AÇILIR MENÜ VE OK DÜZELTMESİ) ---- */
+.custom-select-wrapper {
+    position: relative;
+    flex: 0 1 200px;
+    min-width: 170px;
+}
+
+.custom-select {
+    appearance: none; /* Tarayıcının çirkin okunu gizler */
+    -webkit-appearance: none;
+    width: 100%;
+    padding-right: 40px !important; /* İkona yer aç */
+    cursor: pointer;
+}
+
+.select-arrow {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none; /* Tıklamayı alttaki select'e geçirir */
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.pagination-btn {
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent-color);
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: opacity 0.2s;
+}
+
+.pagination-btn:disabled {
+    background: var(--sidebar-bg);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.5;
+}

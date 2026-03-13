@@ -31,17 +31,20 @@
     color: white;
 
     transform: translateY(101%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0; /* ✨ ÇÖZÜM 1: Fare üzerinde değilken KESİNLİKLE görünmez yap */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease; /* Animasyonu yumuşattık */
 
     display: flex;
     flex-direction: column;
     gap: 6px;
-    max-height: 70%;
+    max-height: 85%; /* Sığması için %70'den %85'e çıkardık */
     justify-content: flex-end;
+    overflow-y: auto; /* ✨ ÇÖZÜM 2: Çok uzun içerikleri dışarı taşırma, içeride kaydır */
 }
 
 .content-card:hover .card-overlay {
     transform: translateY(0);
+    opacity: 1; /* ✨ Fare üzerine gelince tekrar görünür yap */
 }
 
 .card-title {
