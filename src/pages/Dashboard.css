@@ -135,23 +135,32 @@
     opacity: 0.7;
 }
 
-/* --- GERİ SAYIM WIDGETI --- */
+/* --- YENİLENMİŞ GERİ SAYIM WIDGETI --- */
 .countdown-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 15px;
+    /* Kartların çok ezilmemesi için min genişliği 250px'den 280px'e çıkardık */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
 }
 
 .countdown-card {
-    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 15px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.2) 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; /* Daha tatlı yuvarlak köşeler */
+    padding: 20px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column; /* YAN YANA YERİNE ALT ALTA (Taşmayı kesin olarak çözer) */
+    gap: 20px; /* Başlık ve sayaç arası boşluk */
     position: relative;
     overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15); /* Derinlik katar */
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+.countdown-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-color);
+    box-shadow: 0 12px 25px rgba(236, 72, 153, 0.15);
 }
 
 .countdown-card::before {
@@ -160,90 +169,162 @@
     left: 0;
     top: 0;
     height: 100%;
-    width: 4px;
+    width: 5px;
     background: var(--accent-color);
 }
 
-.countdown-card.passed::before { background: var(--text-muted); }
+.countdown-card.passed::before {
+    background: #10b981; /* Etkinlik geçince/gelince yeşil renk alır */
+}
 
-.cd-info { display: flex; flex-direction: column; }
-.cd-title { margin: 0 0 5px 0; color: var(--text-main); font-size: 1.1rem; }
-.cd-date { color: var(--text-muted); font-size: 0.8rem; }
+.cd-info {
+    display: flex;
+    flex-direction: column;
+    padding-right: 85px;
+}
+
+.cd-title {
+    margin: 0 0 8px 0;
+    color: var(--text-main);
+    font-size: 1.25rem;
+    line-height: 1.3;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+.cd-date {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
 
 /* --- YENİ ZAMANLAYICI KUTUCUKLARI (TIMER UI) --- */
 .cd-days {
-    text-align: right;
+    width: 100%;
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+    justify-content: flex-start;
 }
 
 .cd-timer {
     display: flex;
-    gap: 8px;
-    justify-content: flex-end;
+    gap: 10px;
+    width: 100%; /* Tüm genişliği kapla */
 }
 
 .cd-time-box {
+    flex: 1; /* TÜM KUTULARI EŞİT DAĞITIR (Cuk oturmasını sağlayan sihir) */
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: rgba(0,0,0,0.15); /* Hafif gölgeli arka plan */
-    padding: 6px 12px;
-    border-radius: 8px;
-    min-width: 45px;
+    background: rgba(0,0,0,0.25);
+    padding: 12px 5px;
+    border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .cd-number {
-    font-size: 1.4rem;
-    font-weight: bold;
+    font-size: 1.5rem;
+    font-weight: 800;
     color: var(--text-main);
     line-height: 1;
+    margin-bottom: 5px;
 }
 
 .cd-label {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    color: var(--text-muted);
-    margin-top: 4px;
+    color: var(--accent-color); /* Temaya uyumlu Pembe/Vurgu rengi */
+    font-weight: bold;
     letter-spacing: 0.5px;
 }
 
 .cd-passed {
-    font-size: 1rem;
-    color: #10b981; /* Geçti veya Tamamlandı Rengi */
+    font-size: 1.1rem;
+    color: #10b981;
     font-weight: bold;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 10px 15px;
+    border-radius: 10px;
+    width: 100%;
+    text-align: center;
+    border: 1px dashed rgba(16, 185, 129, 0.3);
 }
+
 .cd-actions {
     position: absolute;
-    top: 5px;
-    right: 5px;
+    top: 15px;
+    right: 15px;
     display: flex;
-    gap: 5px;
+    gap: 8px;
     opacity: 0;
     transition: opacity 0.2s;
+}
+
+@media (max-width: 768px) {
+    .cd-actions { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr; /* Hızlı menüyü tek satıra yay */
+        gap: 15px;
+    }
+
+    /* YENİ: Geri Sayım Mobilde Taşma Çözümü */
+    .countdown-grid {
+        grid-template-columns: 1fr; /* Mobilde kartların yan yana gelmeye çalışıp ekranı taşırmasını kesin engeller */
+    }
+
+    .countdown-card {
+        padding: 15px; /* Mobilde kartın iç boşluğunu biraz daraltıp yer kazandırıyoruz */
+        gap: 15px;
+    }
+
+    .cd-info {
+        padding-right: 85px;
+    }
+
+    .cd-timer {
+        gap: 6px; /* Kutucuklar arasındaki boşluğu küçültüyoruz */
+    }
+
+    .cd-time-box {
+        padding: 8px 2px; /* Kutucuğun iç boşluğunu daraltıyoruz */
+        min-width: unset; /* Minimum genişlik zorlamasını kaldırıyoruz ki sığabilsin */
+    }
+
+    .cd-number {
+        font-size: 1.15rem; /* Mobilde rakamları biraz küçültüyoruz ki dışarı taşmasın */
+    }
+
+    .cd-label {
+        font-size: 0.6rem;
+    }
 }
 
 .countdown-card:hover .cd-actions { opacity: 1; }
 
 .cd-actions button {
-    background: var(--bg-color);
-    color: var(--text-muted);
+    background: rgba(255,255,255,0.1);
+    color: var(--text-main);
     border: none;
-    width: 26px;
-    height: 26px;
-    border-radius: 5px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 0.75rem;
-
-    /* İkonu tam merkeze oturtan sihirli ayar: */
+    font-size: 0.85rem;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 0;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
 }
-.cd-actions button:hover { color: var(--text-main); }
+
+.cd-actions button:hover {
+    background: var(--accent-color);
+    color: white;
+    transform: scale(1.1);
+}
 
 /* --- BUZDOLABI NOTLARI (POST-IT) --- */
 .notes-grid {

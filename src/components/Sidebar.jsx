@@ -101,7 +101,7 @@ export default function Sidebar() {
                     </NavLink>
                 </nav>
 
-                <div style={{ marginTop: "auto", padding: "0 16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div className="sidebar-footer">
                     {!isOpen ? null : (
                         <div style={{ textAlign: "center", fontSize: "0.9rem", color: "var(--text-muted)" }}>
                             Aktif Kullanıcı: <b style={{color: "var(--text-main)", textTransform: "capitalize"}}>{currentUser}</b>

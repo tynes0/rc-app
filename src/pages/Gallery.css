@@ -305,107 +305,6 @@ select.add-todo-input {
     padding-right: 40px;
 }
 
-/* ---- ÖZEL VİDEO OYNATICI (CUSTOM PLAYER) ---- */
-.custom-video-wrapper {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #000;
-    overflow: hidden;
-    border-radius: inherit;
-}
-
-.custom-video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    outline: none;
-}
-
-.video-overlay-play {
-    position: absolute;
-    background: rgba(217, 70, 239, 0.85); /* Tema rengimiz (Mor) */
-    color: white;
-    width: 75px;
-    height: 75px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.2rem;
-    padding-left: 5px; /* Play ikonunu merkeze oturtmak için ufak hile */
-    cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-    z-index: 10;
-}
-
-.video-overlay-play:hover {
-    transform: scale(1.1);
-    background: var(--accent-color);
-}
-
-.custom-video-controls {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 30px 20px 15px;
-    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    opacity: 0;
-    transition: opacity 0.3s;
-    z-index: 15;
-}
-
-/* Mobilde hep görünür, masaüstünde hover ile gelir */
-@media (max-width: 768px) {
-    .custom-video-controls { opacity: 1; }
-}
-.custom-video-wrapper:hover .custom-video-controls { opacity: 1; }
-
-.custom-video-controls button {
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 1.3rem;
-    cursor: pointer;
-    transition: color 0.2s;
-}
-
-.custom-video-controls button:hover { color: var(--accent-color); }
-
-.video-progress-bar {
-    flex: 1;
-    height: 6px;
-    background: rgba(255,255,255,0.3);
-    border-radius: 4px;
-    cursor: pointer;
-    position: relative;
-    transition: height 0.2s;
-}
-
-.video-progress-bar:hover { height: 8px; }
-
-.video-progress-fill {
-    height: 100%;
-    background: var(--accent-color);
-    border-radius: 4px;
-    pointer-events: none;
-}
-
-.video-time {
-    color: white;
-    font-size: 0.85rem;
-    font-family: monospace;
-    font-weight: bold;
-}
-
 /* ---- VİDEO VE SES KONTROLLERİ ---- */
 
 /* Dikey Videoların Slayt İçinde Taşmasını Engelle */
@@ -413,61 +312,6 @@ select.add-todo-input {
     max-height: 70vh; /* Ekran yüksekliğinin %70'i ile sınırla */
     width: auto; /* Genişliği otomatik ayarla */
     margin: 0 auto; /* Merkeze hizala */
-}
-
-/* Ses Kontrol Alanı */
-.video-volume-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-/* Ses Kaydırıcısı (Slider) - Dikey */
-.video-volume-slider {
-    position: absolute;
-    bottom: 100%; /* İkonun üstünde başla */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 30px;
-    height: 100px;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 15px;
-    padding: 10px 0;
-    display: flex;
-    justify-content: center;
-    opacity: 0; /* Başlangıçta gizli */
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-/* İkona veya kaydırıcının kendisine gelince göster */
-.video-volume-container:hover .video-volume-slider,
-.video-volume-slider:hover {
-    opacity: 1;
-    visibility: visible;
-    bottom: 140%; /* Biraz daha yukarı kaydır */
-}
-
-/* Kaydırıcı Çubuğu (Range Input) */
-.volume-range {
-    writing-mode: bt-lr; /* Dikey kaydırıcı için */
-    /* -webkit-appearance: slider-vertical; */ 
-    width: 8px;
-    height: 80%;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
-    outline: none;
-    cursor: pointer;
-}
-
-.volume-range::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
-    background: white;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 /* ---- FOTOĞRAF DETAY YAZILARI (TİPOGRAFİ) ---- */
@@ -715,7 +559,6 @@ select.add-todo-input {
     .album-header-info .album-title { font-size: 1.25rem; }
 }
 
-/* --- DÜZELTİLEN DÜZENLE BUTONU (SOL ÜST KÖŞE) --- */
 .photo-edit-btn {
     position: absolute;
     top: 10px;

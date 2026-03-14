@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
 import { db, storage } from "../firebase";
+import CustomVideoPlayer from "../components/CustomVideoPlayer";
 import "./Gallery.css";
 import "./Movies.css";
 
@@ -32,7 +33,6 @@ export default function Gallery() {
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [editingAlbum, setEditingAlbum] = useState({});
 
-    // YENİ: Fotoğraf Düzenleme State'leri
     const [isEditPhotoModalOpen, setIsEditPhotoModalOpen] = useState(false);
     const [editingPhoto, setEditingPhoto] = useState(null);
 
@@ -47,109 +47,6 @@ export default function Gallery() {
 
     const touchStartX = useRef(0);
     const touchEndX = useRef(0);
-
-    const CustomVideoPlayer = ({ src, className }) => {
-        const wrapperRef = useRef(null);
-        const videoRef = useRef(null);
-
-        const [isPlaying, setIsPlaying] = useState(false);
-        const [progress, setProgress] = useState(0);
-        const [currentTime, setCurrentTime] = useState("0:00");
-        const [duration, setDuration] = useState("0:00");
-        const [volume, setVolume] = useState(1);
-        const [isMuted, setIsMuted] = useState(false);
-        const [isFullscreen, setIsFullscreen] = useState(false);
-
-        useEffect(() => {
-            const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-            document.addEventListener('fullscreenchange', handleFullscreenChange);
-            return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-        }, []);
-
-        useEffect(() => {
-            if (videoRef.current) {
-                videoRef.current.volume = volume;
-                videoRef.current.muted = isMuted;
-            }
-        }, [volume, isMuted]);
-
-        const togglePlay = (e) => {
-            e.stopPropagation();
-            if (videoRef.current.paused) { videoRef.current.play(); setIsPlaying(true); }
-            else { videoRef.current.pause(); setIsPlaying(false); }
-        };
-
-        const toggleMute = (e) => { e.stopPropagation(); setIsMuted(!isMuted); };
-
-        const handleVolumeChange = (e) => {
-            e.stopPropagation();
-            const newVolume = parseFloat(e.target.value);
-            setVolume(newVolume);
-            setIsMuted(newVolume === 0);
-            if (videoRef.current) {
-                videoRef.current.volume = newVolume;
-                videoRef.current.muted = newVolume === 0;
-            }
-        };
-
-        const handleTimeUpdate = () => {
-            const current = videoRef.current.currentTime; const dur = videoRef.current.duration;
-            if (dur > 0) setProgress((current / dur) * 100);
-            setCurrentTime(formatDuration(current));
-        };
-
-        const handleLoadedData = () => {
-            setDuration(formatDuration(videoRef.current.duration));
-            if (videoRef.current.autoplay) setIsPlaying(true);
-        };
-
-        const handleProgressClick = (e) => {
-            e.stopPropagation(); const bar = e.currentTarget;
-            const clickPos = (e.pageX - bar.getBoundingClientRect().left) / bar.offsetWidth;
-            videoRef.current.currentTime = clickPos * videoRef.current.duration;
-        };
-
-        const toggleFullscreen = async (e) => {
-            e.stopPropagation();
-            if (!document.fullscreenElement) {
-                if (wrapperRef.current.requestFullscreen) await wrapperRef.current.requestFullscreen();
-                else if (wrapperRef.current.webkitRequestFullscreen) await wrapperRef.current.webkitRequestFullscreen();
-            } else {
-                if (document.exitFullscreen) await document.exitFullscreen();
-                else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
-            }
-        };
-
-        return (
-            <div ref={wrapperRef} className={`custom-video-wrapper ${className}`} onClick={togglePlay}>
-                <video ref={videoRef} src={src} className="custom-video" onTimeUpdate={handleTimeUpdate} onLoadedData={handleLoadedData} onEnded={() => setIsPlaying(false)} playsInline />
-                {!isPlaying && <div className="video-overlay-play"><i className="fa-solid fa-play"></i></div>}
-
-                <div className="custom-video-controls" onClick={(e) => e.stopPropagation()}>
-                    <button onClick={togglePlay}><i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'}`}></i></button>
-
-                    <div className="video-volume-container" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <button onClick={toggleMute} style={{ cursor: 'pointer', padding: '0 5px' }}>
-                            <i className={`fa-solid ${isMuted || volume === 0 ? 'fa-volume-xmark' : volume < 0.5 ? 'fa-volume-low' : 'fa-volume-high'}`}></i>
-                        </button>
-                        <div className="video-volume-slider" style={{ display: 'flex', alignItems: 'center' }}>
-                            <input type="range" min="0" max="1" step="0.05" value={isMuted ? 0 : volume} onChange={handleVolumeChange} className="volume-range" style={{ cursor: 'pointer', width: '70px', height: '4px' }} />
-                        </div>
-                    </div>
-
-                    <span className="video-time" style={{marginLeft: "auto"}}>{currentTime}</span>
-                    <div className="video-progress-bar" onClick={handleProgressClick}>
-                        <div className="video-progress-fill" style={{ width: `${progress}%` }}></div>
-                    </div>
-                    <span className="video-time">{duration}</span>
-
-                    <button onClick={toggleFullscreen} title={isFullscreen ? "Küçült" : "Tam Ekran"} style={{ marginLeft: "5px" }}>
-                        <i className={`fa-solid ${isFullscreen ? 'fa-compress' : 'fa-expand'}`}></i>
-                    </button>
-                </div>
-            </div>
-        );
-    };
 
     useEffect(() => {
         const qPhotos = query(collection(db, "gallery"), orderBy("createdAt", "desc"));

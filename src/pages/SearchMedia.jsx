@@ -9,12 +9,12 @@ export default function SearchMedia() {
     const [query, setQuery] = useState("");
     const [activeQuery, setActiveQuery] = useState("");
     const [selectedGenre, setSelectedGenre] = useState("");
-    const [mediaFilter, setMediaFilter] = useState("all"); // YENİ: Dizi / Film filtresi state'i
+    const [mediaFilter, setMediaFilter] = useState("all");
     const [genresList, setGenresList] = useState([]);
 
     const [tmdbResults, setTmdbResults] = useState([]);
     const [apiPage, setApiPage] = useState(1);
-    const [totalApiPages, setTotalApiPages] = useState(1); // YENİ: API'den gelen gerçek toplam sayfa sayısı
+    const [totalApiPages, setTotalApiPages] = useState(1);
     const [hasMoreApiPages, setHasMoreApiPages] = useState(true);
     const [isSearching, setIsSearching] = useState(false);
 
@@ -83,7 +83,7 @@ export default function SearchMedia() {
                 return Array.from(uniqueMap.values());
             });
 
-            setTotalApiPages(totalPagesFromApi); // DÜZELTME: API'nin sayfa kapasitesini devral
+            setTotalApiPages(totalPagesFromApi);
             setHasMoreApiPages(pageNum < totalPagesFromApi && pageNum < 500);
             setApiPage(pageNum);
         } catch (error) { console.error("API Hatası:", error); }
@@ -93,9 +93,8 @@ export default function SearchMedia() {
     useEffect(() => {
         setCurrentPage(1);
         fetchApiData(1, true, activeQuery, selectedGenre);
-    }, [activeQuery, selectedGenre]); // mediaFilter'ı API tetikleyiciye eklemiyoruz ki frontend tarafında hızlıca filtrelensin
+    }, [activeQuery, selectedGenre]);
 
-    // YENİ: Dizi/Film filtresinin arama sonuçlarına uygulanması
     const displayedResults = tmdbResults.filter(item => {
         if (mediaFilter !== "all" && item.media_type !== mediaFilter) return false;
         if (!selectedGenre || activeQuery === "") return true;
@@ -103,6 +102,12 @@ export default function SearchMedia() {
     });
 
     const localTotalPages = Math.max(1, Math.ceil(displayedResults.length / itemsPerPage));
+
+    // YENİ ÇÖZÜM: Toplam sayfa sayısını hesaplayan akıllı algoritma
+    // TMDB her API sayfasında 20 sonuç verir. (totalApiPages * 20) ile havuzdaki tahmini toplam medyayı bulup, 
+    // bunu senin seçtiğin (10, 20, 40) itemsPerPage değerine bölerek GERÇEK UI toplam sayfasını buluyoruz.
+    const estimatedTotalPages = Math.max(localTotalPages, Math.ceil((totalApiPages * 20) / itemsPerPage));
+    const displayTotalPages = hasMoreApiPages ? estimatedTotalPages : localTotalPages;
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -215,7 +220,6 @@ export default function SearchMedia() {
                     </button>
                 </form>
 
-                {/* YENİ: Dizi / Film Filtresi Seçici */}
                 <div className="custom-select-wrapper">
                     <select
                         className="search-input custom-select"
@@ -305,7 +309,7 @@ export default function SearchMedia() {
                 </div>
             )}
 
-            {/* DÜZELTME: "Total Pages" UI Görünümü Artık Dinamik */}
+            {/* DEĞİŞEN KISIM: Sayfalama UI'ı */}
             {(hasMoreApiPages || localTotalPages > 1) && (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '30px', paddingBottom: '20px' }}>
                     <button onClick={prevPage} disabled={currentPage === 1 || isSearching} className="pagination-btn">
@@ -313,7 +317,7 @@ export default function SearchMedia() {
                     </button>
 
                     <span style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>
-                        Sayfa {currentPage} <span style={{color: 'var(--text-muted)', fontSize: '0.9rem'}}>/ {hasMoreApiPages ? '...' : localTotalPages}</span>
+                        Sayfa {currentPage} <span style={{color: 'var(--text-muted)', fontSize: '0.9rem'}}>/ {displayTotalPages}</span>
                     </span>
 
                     <button onClick={nextPage} disabled={(!hasMoreApiPages && currentPage >= localTotalPages) || isSearching} className="pagination-btn">

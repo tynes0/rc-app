@@ -179,13 +179,13 @@ export default function Todos() {
     return (
         <div className="todos-container">
             <div className="todo-header">
-                <h2>📝 Ortak Yapılacaklar</h2>
-                <p>Eksikleri, planları ve alınacakları organize et.</p>
+                <h2>📝 Yapılacaklar listesi</h2>
+                <p>Eksikleri, planları organize et...</p>
             </div>
 
             <div className="progress-container">
                 <div className="progress-header">
-                    <span>Birlikte Başarım 🚀</span>
+                    <span>Başarım Yüzdesi 🚀</span>
                     <span>% {progressPercent}</span>
                 </div>
                 <div className="progress-track">
