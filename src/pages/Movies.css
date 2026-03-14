@@ -307,3 +307,157 @@
     background: #eab308;
     color: white;
 }
+
+/* --- KARARSIZLIK ZARI (YÜZEN BUTON - FAB) --- */
+.random-picker-fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 65px;
+    height: 65px;
+    background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 2.2rem;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(236, 72, 153, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1000;
+}
+
+.random-picker-fab:hover {
+    transform: scale(1.15) rotate(15deg);
+    box-shadow: 0 15px 35px rgba(236, 72, 153, 0.8);
+}
+
+/* --- KARIŞTIRICI EKRANI VE ANİMASYONLAR --- */
+.picker-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+}
+
+.shuffling-poster {
+    width: 220px;
+    height: 330px;
+    border-radius: 16px;
+    object-fit: cover;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    /* Hızlı geçiş hissi için hafif bulanık ve küçültülmüş */
+    filter: blur(3px) brightness(0.8);
+    transform: scale(0.95);
+    animation: shake 0.2s infinite alternate;
+}
+
+.winner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.winner-title {
+    color: var(--accent-color);
+    font-size: 2.5rem;
+    margin: 0;
+    text-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+    animation: fadeInDown 0.5s ease forwards;
+}
+
+.winner-poster {
+    width: 250px;
+    height: 375px;
+    border-radius: 20px;
+    object-fit: cover;
+    /* Ekrana fırlayarak gelme efekti */
+    animation: winnerPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    box-shadow: 0 0 50px rgba(236, 72, 153, 0.6), 0 20px 40px rgba(0,0,0,0.6);
+}
+
+.winner-movie-name {
+    font-size: 1.8rem;
+    color: var(--text-main);
+    margin: 0;
+    max-width: 400px;
+}
+
+.winner-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    animation: fadeInUp 0.8s ease forwards;
+    opacity: 0;
+}
+
+.winner-btn {
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: none;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.winner-btn.view { background: var(--accent-color); color: white; }
+.winner-btn.view:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(236, 72, 153, 0.4); }
+
+.winner-btn.retry { background: var(--sidebar-bg); color: var(--text-main); border: 1px solid var(--border-color); }
+.winner-btn.retry:hover { background: var(--border-color); }
+
+@keyframes shake {
+    0% { transform: scale(0.95) rotate(-2deg); }
+    100% { transform: scale(0.95) rotate(2deg); }
+}
+
+@keyframes winnerPop {
+    0% { transform: scale(0.2) translateY(100px) rotate(-10deg); opacity: 0; }
+    100% { transform: scale(1) translateY(0) rotate(0); opacity: 1; }
+}
+
+@keyframes fadeInDown {
+    0% { transform: translateY(-30px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    0% { transform: translateY(30px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+/* --- EMOJİLİ PATLAMA EFEKTİ (CONFETTI) --- */
+.confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* Tıklamaları engellemez */
+    overflow: hidden;
+}
+
+.confetti-particle {
+    position: absolute;
+    top: -50px; /* Ekranın üstünden başlasın */
+    opacity: 1;
+    animation: confettiFall linear forwards;
+}
+
+@keyframes confettiFall {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        /* Ekranın altına kadar düşer ve kaybolur */
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0;
+    }
+}

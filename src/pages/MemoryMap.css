@@ -1,0 +1,215 @@
+﻿.memory-map-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 80px); /* Ekranı tam kaplaması için */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .memory-map-container {
+        height: calc(100vh - 110px);
+    }
+}
+
+.map-wrapper {
+    flex: 1;
+    width: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    position: relative;
+    z-index: 1; /* Diğer modalların altında kalmasını garantiler */
+}
+
+/* Haritanın ana kutusu */
+.leaflet-map {
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-color);
+}
+
+/* Haritanın zift siyahı rengini yumuşatıp, tatlı bir antrasit/kömür grisine çeviriyoruz */
+.leaflet-tile-pane {
+    /* Brightness (Parlaklık) artırılıp, Contrast (Zıtlık) kısıldığında harita yumuşar */
+    filter: brightness(1.6) contrast(0.85);
+}
+
+/* Haritanın altındaki gri boşlukların sırıtmasını engellemek için */
+.leaflet-container {
+    background: var(--bg-color) !important;
+}
+
+/* --- LEAFLET POPUP (BİLGİ PENCERESİ) ÖZELLEŞTİRMESİ --- */
+.leaflet-popup-content-wrapper {
+    background: var(--sidebar-bg) !important;
+    color: var(--text-main) !important;
+    border-radius: 16px !important;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.leaflet-popup-tip {
+    background: var(--sidebar-bg) !important;
+    border-top: 1px solid var(--border-color);
+    border-left: 1px solid var(--border-color);
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+    min-width: 200px;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+    color: white !important;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.2s;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+    background: var(--accent-color) !important;
+}
+
+/* POPUP İÇERİĞİ TİPOGRAFİSİ */
+.memory-popup-content {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+}
+
+.popup-img {
+    width: calc(100% + 30px);
+    margin: -15px -15px 10px -15px; /* Resmi tam köşelere yaymak için */
+    height: 140px;
+    object-fit: cover;
+    border-bottom: 2px solid var(--accent-color);
+}
+
+.memory-popup-content h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.2rem;
+    color: var(--text-main);
+}
+
+.popup-date {
+    margin: 0 0 10px 0;
+    font-size: 0.8rem;
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+.popup-note {
+    margin: 0 0 15px 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.popup-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    border-top: 1px dashed var(--border-color);
+    padding-top: 10px;
+    text-transform: capitalize;
+}
+
+.popup-delete-btn {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.popup-delete-btn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* --- YENİ: GALERİDEN FOTOĞRAF SEÇİCİ (KUSURSUZ HİZALAMA) --- */
+.image-selection-area {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%; /* Kapsayıcıyı tam genişliğe sabitle */
+}
+
+.gallery-picker-container {
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px;
+    max-height: 160px; /* Kaydırma alanı yüksekliği */
+    overflow-y: auto;
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Seçici içindeki scrollbar'ı şıklaştıralım */
+.gallery-picker-container::-webkit-scrollbar {
+    width: 6px;
+}
+.gallery-picker-container::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+
+/* Grid yerine Flex kullanarak katı bir dizilim sağlıyoruz */
+.gallery-picker-grid {
+    display: flex;
+    flex-wrap: wrap; /* Sığmayanlar alt satıra geçsin */
+    gap: 10px; /* Kareler arası boşluk */
+    justify-content: flex-start;
+}
+
+.gallery-picker-item {
+    width: 70px; /* Kesin genişlik */
+    height: 70px; /* Kesin yükseklik (Tam kare) */
+    flex-shrink: 0; /* Küçülmesini ve ezilmesini kesinlikle yasakla */
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.2s;
+    opacity: 0.7;
+    background: var(--bg-color); /* Resim yüklenene kadar boş durmasın */
+}
+
+.gallery-picker-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Resmi sündürmeden kareye sığdırarak kes */
+    display: block; /* Alt kısımdaki boşluk bug'ını engeller */
+}
+
+.gallery-picker-item:hover {
+    opacity: 1;
+    transform: translateY(-3px); /* Büyütmek yerine yukarı kaydır (Hizayı bozmaz) */
+}
+
+.gallery-picker-item.selected {
+    border-color: var(--accent-color);
+    opacity: 1;
+    box-shadow: 0 5px 15px rgba(236, 72, 153, 0.4);
+    transform: translateY(-3px);
+}

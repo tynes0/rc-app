@@ -1,0 +1,147 @@
+﻿.canvas-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    /* Mobilde aşağıya rahat inebilmek için minimum yükseklik */
+    min-height: calc(100vh - 100px);
+}
+
+.canvas-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    background: var(--sidebar-bg);
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* --- ARAÇ ÇUBUĞU (PALET) --- */
+.palette-tools {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 15px;
+    background: rgba(0,0,0,0.2);
+    padding: 10px 15px;
+    border-radius: 15px;
+}
+
+.color-picker-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.color-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-main);
+}
+
+.color-btn:hover {
+    transform: scale(1.1);
+}
+
+.color-btn.active {
+    border-color: white;
+    transform: scale(1.2);
+    box-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+
+/* Özel Renk (Color Picker) Tasarımı */
+.custom-color-wrapper {
+    position: relative;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #fb7185, #3b82f6, #10b981);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+}
+
+.custom-color-wrapper i {
+    color: white;
+    font-size: 0.9rem;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.custom-color-input {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: 50px;
+    height: 50px;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 3;
+}
+
+.clear-canvas-btn {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.clear-canvas-btn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* --- ÇİZİM TAHTASI (PIXEL GRID) --- */
+.canvas-board-wrapper {
+    width: 100%;
+    max-width: 500px; /* PC'de çok devasa olmasını engeller */
+    aspect-ratio: 1 / 1; /* Kusursuz kare */
+    background: #111; /* Çizim tahtası arka planı */
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+}
+
+.canvas-board {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    /* EN ÖNEMLİ MOBİL AYARI: Çizerken sayfanın kaymasını iptal eder */
+    touch-action: none;
+    cursor: crosshair;
+}
+
+.pixel-cell {
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.02); /* Çok hafif ızgara çizgileri */
+    box-sizing: border-box;
+    /* Sürükleme esnasında istenmeyen seçim/highlight efektlerini iptal eder */
+    user-select: none;
+    -webkit-user-drag: none;
+}

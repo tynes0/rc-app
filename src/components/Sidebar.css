@@ -223,3 +223,17 @@
 .logo-text:hover {
     transform: scale(1.1);
 }
+
+.sidebar {
+    /* Mevcut özelliklerin (width, height, background vb.) kalsın */
+    display: flex;
+    flex-direction: column;
+
+    /* YENİ: Taşma kontrolü */
+    overflow-y: auto; /* Dikeyde taşarsa scroll ekle */
+    overflow-x: hidden; /* Yatayda asla kaymasın */
+
+    /* Scrollbar'ın içeriği kapatmaması için sağdan ufak bir boşluk */
+    padding-right: 4px;
+}
+

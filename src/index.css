@@ -1,30 +1,39 @@
 :root {
-    --bg-color: #0f172a;
-    --sidebar-bg: #1e293b;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --accent-color: #c084fc;
-    --border-color: rgba(255, 255, 255, 0.1);
+    --bg-color: #161414; /* Sıcak, mat çok koyu gri/siyah */
+    --sidebar-bg: #201d1d; /* Kartlar için bir ton açığı */
+    --border-color: #332f2f;
+    --accent-color: #fb7185; /* Tatlı bir gül/somon rengi */
+    --accent-hover: #f43f5e;
+    --text-main: #f5f5f5;
+    --text-muted: #9ca3af;
+    --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+    --font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
-.light-theme {
-    --bg-color: #f8fafc;
-    --sidebar-bg: #ffffff;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
-    --accent-color: #a855f7;
-    --border-color: rgba(0, 0, 0, 0.1);
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color);
 }
 
 body {
-    margin: 0;
-    font-family: 'Inter', system-ui, sans-serif;
     background-color: var(--bg-color);
     color: var(--text-main);
-    transition: background-color 0.3s ease, color 0.3s ease;
+    font-family: var(--font-family), serif;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
     min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
-
 * {
     box-sizing: border-box;
 }
@@ -92,37 +101,45 @@ button:focus-visible {
     }
 }
 
-/* ---- MODERN SCROLLBAR TASARIMI ---- */
-
-/* Webkit tarayıcılar (Chrome, Edge, Safari, Opera) için */
-::-webkit-scrollbar {
-    width: 10px; /* Çubuğun genişliği - İnce ve zarif */
-    height: 10px; /* Yatay scroll olursa yüksekliği */
+.modal-overlay, .confirm-overlay, .lightbox-overlay {
+    background: rgba(22, 20, 20, 0.85) !important;
+    backdrop-filter: blur(6px);
 }
 
-/* Kaydırma yolu (Track) - Arka plan */
-::-webkit-scrollbar-track {
-    background: transparent; /* Arka planı şeffaf yapıyoruz ki içerik görünsün */
-    margin-block: 5px; /* Üstten ve alttan biraz boşluk bırak */
+/* ---- ŞİRİN VE YUMUŞAK TARİH/SAAT SEÇİCİ STİLLERİ ---- */
+input[type="date"], input[type="time"] {
+    background-color: rgba(251, 113, 133, 0.03); /* Çok hafif tatlı bir pembemsi arka plan */
+    color: var(--text-main);
+    border: 2px solid var(--border-color); /* Daha yumuşak ama kalın sınır */
+    border-radius: 16px; /* Köşeleri iyice yuvarlattık (Şirin görünüm) */
+    padding: 12px 18px;
+    font-family: var(--font-family), serif;
+    font-weight: 500;
+    outline: none;
+    color-scheme: dark;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); /* İçeriye doğru hafif derinlik */
 }
 
-/* Kaydırma tutamacı (Thumb) - Hareket eden kısım */
-::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.2); /* Yarı saydam beyaz/gri */
-    border-radius: 10px; /* Tamamen yuvarlak köşeler (Hap şeklinde) */
-    border: 3px solid transparent; /* Çubuğun etrafında boşluk hissi yaratmak için hile */
-    background-clip: content-box; /* Kenarlığın içini boyama, böylece etrafı boş kalır */
-    transition: background-color 0.3s ease;
+input[type="date"]:focus, input[type="time"]:focus {
+    border-color: var(--accent-color);
+    background-color: rgba(251, 113, 133, 0.08); /* Tıklayınca pembelik artar */
+    box-shadow: 0 0 15px rgba(251, 113, 133, 0.2), inset 0 2px 5px rgba(0,0,0,0.1); /* Dışarıya tatlı bir parlama */
 }
 
-/* Tutamacın üzerine gelince (Hover) */
-::-webkit-scrollbar-thumb:hover {
-    background-color: var(--accent-color); /* Temamızın ana rengiyle parlasın (Mor/Pembe) */
+/* Takvim İkonunu Daha Etkileşimli Yapalım */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Zıplama efekti için özel animasyon eğrisi */
+    padding: 5px;
+    border-radius: 50%;
 }
 
-/* Firefox için standart destek (Daha az özelleştirilebilir ama uyumluluk için) */
-* {
-    scrollbar-width: thin; /* İnce çubuk */
-    /* İlk renk tutamaç, ikinci renk iz */
-    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+    background-color: rgba(255,255,255,0.1);
+    transform: scale(1.15) rotate(5deg); /* Üzerine gelince hafif büyür ve yan yatar */
 }

@@ -1,5 +1,4 @@
-﻿import { NavLink } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+﻿import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "./Sidebar.css";
 
@@ -47,18 +46,26 @@ export default function Sidebar() {
 
             <aside className={`sidebar ${isOpen ? "open" : "closed"}`}>
                 <div className="sidebar-header">
-                    <h2 className="logo-text" style={{ fontSize: isOpen ? '2rem' : '1rem' }}>
+                    <NavLink to="/app/dashboard" className="logo-text" style={{ fontSize: isOpen ? '2rem' : '1rem', textDecoration: 'none' }} onClick={closeMobile}>
                         {isOpen ? "🐼" : "🐼"}
-                    </h2>
+                    </NavLink>
                     <button className="toggle-btn" onClick={toggleSidebar}>
                         <i className={`fa-solid ${isOpen ? 'fa-chevron-left' : 'fa-bars'}`}></i>
                     </button>
                 </div>
 
                 <nav className="sidebar-nav">
+                    <NavLink to="/app/dashboard" className="nav-item" onClick={closeMobile}>
+                        <i className="fa-solid fa-house"></i>
+                        <span className="nav-text">Ana Menü</span>
+                    </NavLink>
                     <NavLink to="/app/todos" className="nav-item" onClick={closeMobile}>
                         <i className="fa-solid fa-list-check"></i>
                         <span className="nav-text">Yapılacaklar</span>
+                    </NavLink>
+                    <NavLink to="/app/canvas" className="nav-item" onClick={closeMobile}>
+                        <i className="fa-solid fa-palette"></i>
+                        <span className="nav-text">Kanvas</span>
                     </NavLink>
                     <NavLink to="/app/search-media" className="nav-item" onClick={closeMobile}>
                         <i className="fa-solid fa-film"></i>
@@ -66,7 +73,7 @@ export default function Sidebar() {
                     </NavLink>
                     <NavLink to="/app/pool" className="nav-item" onClick={closeMobile}>
                         <i className="fa-solid fa-fire"></i>
-                        <span className="nav-text">Ortak Havuz</span>
+                        <span className="nav-text">Dizi-Film Tinder</span>
                     </NavLink>
                     <NavLink to="/app/movies" className="nav-item" onClick={closeMobile}>
                         <i className="fa-solid fa-film"></i>
@@ -79,6 +86,18 @@ export default function Sidebar() {
                     <NavLink to="/app/gallery" className="nav-item" onClick={closeMobile}>
                         <i className="fa-solid fa-image"></i>
                         <span className="nav-text">Galeri</span>
+                    </NavLink>
+                    <NavLink to="/app/memory-map" className="nav-item" onClick={closeMobile}>
+                        <i className="fa-solid fa-map-location-dot"></i>
+                        <span className="nav-text">Anı Haritası</span>
+                    </NavLink>
+                    <NavLink to="/app/diary" className="nav-item" onClick={closeMobile}>
+                        <i className="fa-solid fa-book-open"></i>
+                        <span className="nav-text">Not Defteri</span>
+                    </NavLink>
+                    <NavLink to="/app/tales" className="nav-item" onClick={closeMobile}>
+                        <i className="fa-solid fa-book-open-reader"></i>
+                        <span className="nav-text">Masallar</span>
                     </NavLink>
                 </nav>
 

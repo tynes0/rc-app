@@ -32,6 +32,10 @@ export default function Gallery() {
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [editingAlbum, setEditingAlbum] = useState({});
 
+    // YENİ: Fotoğraf Düzenleme State'leri
+    const [isEditPhotoModalOpen, setIsEditPhotoModalOpen] = useState(false);
+    const [editingPhoto, setEditingPhoto] = useState(null);
+
     const [photoNote, setPhotoNote] = useState("");
     const [photoDate, setPhotoDate] = useState("");
     const [newAlbumName, setNewAlbumName] = useState("");
@@ -54,13 +58,10 @@ export default function Gallery() {
         const [duration, setDuration] = useState("0:00");
         const [volume, setVolume] = useState(1);
         const [isMuted, setIsMuted] = useState(false);
-
         const [isFullscreen, setIsFullscreen] = useState(false);
 
         useEffect(() => {
-            const handleFullscreenChange = () => {
-                setIsFullscreen(!!document.fullscreenElement);
-            };
+            const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
             document.addEventListener('fullscreenchange', handleFullscreenChange);
             return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
         }, []);
@@ -81,8 +82,14 @@ export default function Gallery() {
         const toggleMute = (e) => { e.stopPropagation(); setIsMuted(!isMuted); };
 
         const handleVolumeChange = (e) => {
-            e.stopPropagation(); const newVolume = parseFloat(e.target.value);
-            setVolume(newVolume); setIsMuted(newVolume === 0);
+            e.stopPropagation();
+            const newVolume = parseFloat(e.target.value);
+            setVolume(newVolume);
+            setIsMuted(newVolume === 0);
+            if (videoRef.current) {
+                videoRef.current.volume = newVolume;
+                videoRef.current.muted = newVolume === 0;
+            }
         };
 
         const handleTimeUpdate = () => {
@@ -105,19 +112,11 @@ export default function Gallery() {
         const toggleFullscreen = async (e) => {
             e.stopPropagation();
             if (!document.fullscreenElement) {
-                // Tam ekrana geç
-                if (wrapperRef.current.requestFullscreen) {
-                    await wrapperRef.current.requestFullscreen();
-                } else if (wrapperRef.current.webkitRequestFullscreen) { // Safari desteği
-                    await wrapperRef.current.webkitRequestFullscreen();
-                }
+                if (wrapperRef.current.requestFullscreen) await wrapperRef.current.requestFullscreen();
+                else if (wrapperRef.current.webkitRequestFullscreen) await wrapperRef.current.webkitRequestFullscreen();
             } else {
-                // Tam ekrandan çık
-                if (document.exitFullscreen) {
-                    await document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) { // Safari desteği
-                    await document.webkitExitFullscreen();
-                }
+                if (document.exitFullscreen) await document.exitFullscreen();
+                else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
             }
         };
 
@@ -129,20 +128,21 @@ export default function Gallery() {
                 <div className="custom-video-controls" onClick={(e) => e.stopPropagation()}>
                     <button onClick={togglePlay}><i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'}`}></i></button>
 
-                    <div className="video-volume-container">
-                        <button onClick={toggleMute}><i className={`fa-solid ${isMuted || volume === 0 ? 'fa-volume-xmark' : volume < 0.5 ? 'fa-volume-low' : 'fa-volume-high'}`}></i></button>
-                        <div className="video-volume-slider">
-                            <input type="range" min="0" max="1" step="0.05" value={isMuted ? 0 : volume} onChange={handleVolumeChange} className="volume-range" orient="vertical" />
+                    <div className="video-volume-container" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <button onClick={toggleMute} style={{ cursor: 'pointer', padding: '0 5px' }}>
+                            <i className={`fa-solid ${isMuted || volume === 0 ? 'fa-volume-xmark' : volume < 0.5 ? 'fa-volume-low' : 'fa-volume-high'}`}></i>
+                        </button>
+                        <div className="video-volume-slider" style={{ display: 'flex', alignItems: 'center' }}>
+                            <input type="range" min="0" max="1" step="0.05" value={isMuted ? 0 : volume} onChange={handleVolumeChange} className="volume-range" style={{ cursor: 'pointer', width: '70px', height: '4px' }} />
                         </div>
                     </div>
 
-                    <span className="video-time">{currentTime}</span>
+                    <span className="video-time" style={{marginLeft: "auto"}}>{currentTime}</span>
                     <div className="video-progress-bar" onClick={handleProgressClick}>
                         <div className="video-progress-fill" style={{ width: `${progress}%` }}></div>
                     </div>
                     <span className="video-time">{duration}</span>
 
-                    {/* YENİ: TAM EKRAN BUTONU */}
                     <button onClick={toggleFullscreen} title={isFullscreen ? "Küçült" : "Tam Ekran"} style={{ marginLeft: "5px" }}>
                         <i className={`fa-solid ${isFullscreen ? 'fa-compress' : 'fa-expand'}`}></i>
                     </button>
@@ -160,7 +160,7 @@ export default function Gallery() {
     }, []);
 
     useEffect(() => {
-        if (isUploadModalOpen || isSettingsModalOpen || itemToDelete || lightboxIndex !== null) {
+        if (isUploadModalOpen || isSettingsModalOpen || isEditPhotoModalOpen || itemToDelete || lightboxIndex !== null) {
             document.documentElement.style.overflow = "hidden";
             document.body.style.overflow = "hidden";
             document.body.style.touchAction = "none";
@@ -175,8 +175,8 @@ export default function Gallery() {
             document.body.style.overflow = "auto";
             document.body.style.touchAction = "auto";
         };
-    }, [isUploadModalOpen, isSettingsModalOpen, itemToDelete, lightboxIndex]);
-    
+    }, [isUploadModalOpen, isSettingsModalOpen, isEditPhotoModalOpen, itemToDelete, lightboxIndex]);
+
     const derivedAlbums = [...new Set(photos.map(p => p.album))];
     const allAlbumNames = [...new Set([...derivedAlbums, ...albumsMeta.map(a => a.name)])];
 
@@ -188,7 +188,6 @@ export default function Gallery() {
     const displayedPhotos = activeView === "Tümü" ? photos : (activeView === "AlbumDetail" ? photos.filter(p => p.album === selectedAlbumView) : []);
     const currentAlbumDetails = activeView === "AlbumDetail" ? albumsMeta.find(a => a.name === selectedAlbumView) : null;
 
-    // --- KLAVYE İLE TAM EKRAN (LIGHTBOX) NAVİGASYONU ---
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (lightboxIndex !== null) {
@@ -201,16 +200,13 @@ export default function Gallery() {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [lightboxIndex, displayedPhotos.length]);
 
-    // TAM EKRAN (LIGHTBOX) KONTROLLERİ
     const nextLightbox = () => setLightboxIndex((prev) => (prev === displayedPhotos.length - 1 ? 0 : prev + 1));
     const prevLightbox = () => setLightboxIndex((prev) => (prev === 0 ? displayedPhotos.length - 1 : prev - 1));
 
-    // SLAYT (SLIDER) KONTROLLERİ
     const nextSlide = () => setSliderIndex((prev) => (prev === displayedPhotos.length - 1 ? 0 : prev + 1));
     const prevSlide = () => setSliderIndex((prev) => (prev === 0 ? displayedPhotos.length - 1 : prev - 1));
     useEffect(() => { setSliderIndex(0); }, [activeView, selectedAlbumView]);
 
-    // ORTAK KAYDIRMA (SWIPE) MANTIĞI
     const handleTouchStart = (e) => { touchStartX.current = e.changedTouches ? e.changedTouches[0].screenX : e.screenX; };
     const handleTouchEnd = (e, isLightbox = false) => {
         touchEndX.current = e.changedTouches ? e.changedTouches[0].screenX : e.screenX;
@@ -252,7 +248,7 @@ export default function Gallery() {
                     async () => {
                         const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                         await addDoc(collection(db, "gallery"), {
-                            url: downloadURL, storagePath: `gallery/${uniqueFileName}`, album: targetAlbum, note: photoNote, date: photoDate, type: isVideo ? "video" : "image", duration: duration, addedBy: currentUser, createdAt: Date.now()
+                            url: downloadURL, storagePath: `gallery/${uniqueFileName}`, album: targetAlbum, note: photoNote, date: photoDate, type: isVideo ? "video" : "duration", duration: duration, addedBy: currentUser, createdAt: Date.now()
                         });
                         filesCompleted++; resolve();
                     }
@@ -287,6 +283,31 @@ export default function Gallery() {
         setIsUploading(false);
     };
 
+    // YENİ: Fotoğraf Düzenleme Kayıt İşlemi
+    const savePhotoEdit = async (e) => {
+        e.preventDefault();
+        try {
+            await updateDoc(doc(db, "gallery", editingPhoto.id), {
+                note: editingPhoto.note,
+                date: editingPhoto.date,
+                album: editingPhoto.album
+            });
+            setIsEditPhotoModalOpen(false);
+        } catch (error) {
+            console.error("Fotoğraf güncellenirken hata:", error);
+        }
+    };
+
+    const openEditPhotoModal = (photo) => {
+        setEditingPhoto({
+            id: photo.id,
+            note: photo.note || "",
+            date: photo.date || "",
+            album: photo.album || (allAlbumNames.length > 0 ? allAlbumNames[0] : "")
+        });
+        setIsEditPhotoModalOpen(true);
+    };
+
     const confirmDelete = async () => {
         try {
             if (itemToDelete.type === 'photo') {
@@ -301,10 +322,7 @@ export default function Gallery() {
                 setActiveView("Albümler"); setIsSettingsModalOpen(false);
             }
             setItemToDelete(null);
-
-            // Eğer tam ekrandan siliyorsa kapat
             setLightboxIndex(null);
-
             if (viewMode === 'slider' && sliderIndex >= displayedPhotos.length - 1) setSliderIndex(Math.max(0, displayedPhotos.length - 2));
         } catch (error) { console.error("Silinirken hata:", error); }
     };
@@ -325,7 +343,6 @@ export default function Gallery() {
                     <div className="photo-grid">
                         {displayedPhotos.map((photo, index) => (
                             <div key={photo.id} className="photo-card">
-                                {/* TIKLANDIĞINDA ARTIK İNDEX DEĞERİNİ GÖNDERİYORUZ */}
                                 <div className="photo-img-wrapper" onClick={() => setLightboxIndex(index)}>
                                     {photo.type === "video" ? (
                                         <>
@@ -333,6 +350,14 @@ export default function Gallery() {
                                             <div className="video-duration-badge"><i className="fa-solid fa-play"></i> {formatDuration(photo.duration)}</div>
                                         </>
                                     ) : <img src={photo.url} alt="Anı" className="photo-img" />}
+
+                                    <button
+                                        className="photo-edit-btn"
+                                        onClick={(e) => { e.stopPropagation(); openEditPhotoModal(photo); }}
+                                        title="Düzenle"
+                                    >
+                                        <i className="fa-solid fa-pen"></i>
+                                    </button>
 
                                     <button className="photo-delete-btn" onClick={(e) => { e.stopPropagation(); setItemToDelete({ type: 'photo', id: photo.id }); }}>
                                         <i className="fa-solid fa-trash-can"></i>
@@ -366,7 +391,13 @@ export default function Gallery() {
                             <div style={{ display: "flex", gap: "15px", justifyContent: "center", alignItems: "center" }}>
                                 {displayedPhotos[sliderIndex].date && <p><i className="fa-regular fa-calendar"></i> {new Date(displayedPhotos[sliderIndex].date).toLocaleDateString('tr-TR')}</p>}
                                 <p style={{textTransform: "capitalize"}}><i className="fa-solid fa-user-pen"></i> {displayedPhotos[sliderIndex].addedBy}</p>
-                                <button className="delete-btn" style={{padding: "4px 10px", fontSize: "0.8rem", marginLeft: "10px"}} onClick={() => setItemToDelete({ type: 'photo', id: displayedPhotos[sliderIndex].id })}>
+
+                                {/* YENİ: Slider'da Düzenle Butonu */}
+                                <button className="delete-btn" style={{padding: "4px 10px", fontSize: "0.8rem", marginLeft: "10px", background: "rgba(59, 130, 246, 0.2)", color: "#3b82f6", border: "1px solid rgba(59, 130, 246, 0.4)"}} onClick={() => openEditPhotoModal(displayedPhotos[sliderIndex])}>
+                                    <i className="fa-solid fa-pen"></i> Düzenle
+                                </button>
+
+                                <button className="delete-btn" style={{padding: "4px 10px", fontSize: "0.8rem"}} onClick={() => setItemToDelete({ type: 'photo', id: displayedPhotos[sliderIndex].id })}>
                                     <i className="fa-solid fa-trash-can"></i> Sil
                                 </button>
                             </div>
@@ -384,9 +415,7 @@ export default function Gallery() {
                 <p>Anılar, videolar ve özel günler...</p>
             </div>
 
-            {/* YENİ DÜZEN: SEKMELER MERKEZDE, İKONLAR SAĞDA */}
             <div className="gallery-main-tabs-wrapper">
-                {/* Merkez: Sekmeler */}
                 <div className="gallery-main-tabs">
                     <button className={`main-tab ${activeView === "Tümü" ? "active" : ""}`} onClick={() => setActiveView("Tümü")}>
                         <i className="fa-solid fa-images"></i> Tüm Medyalar
@@ -396,7 +425,6 @@ export default function Gallery() {
                     </button>
                 </div>
 
-                {/* Sağ Taraf: Görünüm İkonları (Sadece Tümü veya Albüm Detayındayken ve Fotoğraf Varsa Çıkar) */}
                 {(activeView === "Tümü" || activeView === "AlbumDetail") && displayedPhotos.length > 0 && (
                     <div className="view-toggles-container">
                         <div className="view-toggles">
@@ -446,7 +474,6 @@ export default function Gallery() {
                     {activeView === "AlbumDetail" && selectedAlbumView && (
                         <>
                             <div className="album-header-box">
-                                {/* 1. SATIR: Sadece Butonlar (Biri sağda, biri solda) */}
                                 <div className="album-header-actions">
                                     <button className="back-btn" onClick={() => setActiveView("Albümler")}>
                                         <i className="fa-solid fa-arrow-left"></i> Geri
@@ -455,8 +482,6 @@ export default function Gallery() {
                                         <i className="fa-solid fa-gear"></i> Ayarlar
                                     </button>
                                 </div>
-
-                                {/* 2. SATIR: Başlık ve Notlar (Tam genişlikte, dilediği kadar uzayabilir) */}
                                 <div className="album-header-info">
                                     <h3 className="album-title">{currentAlbumDetails?.name || selectedAlbumView}</h3>
                                     {currentAlbumDetails?.note && <p className="album-note">{currentAlbumDetails.note}</p>}
@@ -499,6 +524,33 @@ export default function Gallery() {
                         <div style={{borderTop: "1px solid var(--border-color)", paddingTop: "20px", marginTop: "10px", textAlign: "right"}}>
                             <button className="delete-btn" onClick={() => setItemToDelete({ type: 'album', name: editingAlbum.originalName })}><i className="fa-solid fa-trash-can"></i> Tüm Albümü Sil</button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* YENİ: FOTOĞRAF DÜZENLEME MODALI */}
+            {isEditPhotoModalOpen && editingPhoto && (
+                <div className="modal-overlay" onClick={() => setIsEditPhotoModalOpen(false)}>
+                    <div className="add-todo-modal" onClick={(e) => e.stopPropagation()}>
+                        <button className="close-modal-btn" onClick={() => setIsEditPhotoModalOpen(false)}><i className="fa-solid fa-xmark"></i></button>
+                        <div className="add-todo-header"><h3>Medyayı Düzenle</h3><p>Notunu, tarihini veya albümünü değiştir.</p></div>
+                        <form onSubmit={savePhotoEdit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <div>
+                                <label style={{fontSize:"0.85rem", color:"var(--text-muted)", marginBottom:"5px", display:"block"}}>Hangi Albümde?</label>
+                                <select className="add-todo-input" style={{width:"100%"}} value={editingPhoto.album} onChange={(e) => setEditingPhoto({...editingPhoto, album: e.target.value})}>
+                                    {allAlbumNames.map((album, idx) => <option key={idx} value={album}>{album}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label style={{fontSize:"0.85rem", color:"var(--text-muted)", marginBottom:"5px", display:"block"}}>Tarih</label>
+                                <input type="date" className="add-todo-input" style={{width:"100%"}} value={editingPhoto.date} onChange={(e) => setEditingPhoto({...editingPhoto, date: e.target.value})} />
+                            </div>
+                            <div>
+                                <label style={{fontSize:"0.85rem", color:"var(--text-muted)", marginBottom:"5px", display:"block"}}>Not</label>
+                                <input type="text" className="add-todo-input" placeholder="Bu anılarda ne oldu?..." value={editingPhoto.note} onChange={(e) => setEditingPhoto({...editingPhoto, note: e.target.value})} style={{width:"100%"}}/>
+                            </div>
+                            <button type="submit" className="add-todo-submit"><i className="fa-solid fa-check"></i> Kaydet</button>
+                        </form>
                     </div>
                 </div>
             )}
@@ -554,24 +606,12 @@ export default function Gallery() {
                 </div>
             )}
 
-            {/* YENİ: KAYDIRILABİLİR TAM EKRAN (LIGHTBOX) */}
             {lightboxIndex !== null && displayedPhotos[lightboxIndex] && (
                 <div className="lightbox-overlay" onClick={() => setLightboxIndex(null)}>
                     <button className="lightbox-close" onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}><i className="fa-solid fa-xmark"></i></button>
-
-                    {/* Oklar */}
                     <button className="lightbox-arrow left" onClick={(e) => { e.stopPropagation(); prevLightbox(); }}><i className="fa-solid fa-chevron-left"></i></button>
                     <button className="lightbox-arrow right" onClick={(e) => { e.stopPropagation(); nextLightbox(); }}><i className="fa-solid fa-chevron-right"></i></button>
-
-                    {/* İçerik ve Kaydırma Alanı */}
-                    <div
-                        className="lightbox-content-wrapper"
-                        onClick={(e) => e.stopPropagation()}
-                        onMouseDown={handleTouchStart}
-                        onMouseUp={(e) => handleTouchEnd(e, true)}
-                        onTouchStart={handleTouchStart}
-                        onTouchEnd={(e) => handleTouchEnd(e, true)}
-                    >
+                    <div className="lightbox-content-wrapper" onClick={(e) => e.stopPropagation()} onMouseDown={handleTouchStart} onMouseUp={(e) => handleTouchEnd(e, true)} onTouchStart={handleTouchStart} onTouchEnd={(e) => handleTouchEnd(e, true)}>
                         {displayedPhotos[lightboxIndex].type === "video" ? (
                             <CustomVideoPlayer src={displayedPhotos[lightboxIndex].url} className="lightbox-video-wrapper" />
                         ) : (
@@ -581,7 +621,6 @@ export default function Gallery() {
                 </div>
             )}
 
-            {/* SİLME ONAY PENCERESİ */}
             {itemToDelete && (
                 <div className="confirm-overlay" onClick={() => setItemToDelete(null)}>
                     <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>

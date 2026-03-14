@@ -9,10 +9,12 @@ export default function SearchMedia() {
     const [query, setQuery] = useState("");
     const [activeQuery, setActiveQuery] = useState("");
     const [selectedGenre, setSelectedGenre] = useState("");
+    const [mediaFilter, setMediaFilter] = useState("all"); // YENİ: Dizi / Film filtresi state'i
     const [genresList, setGenresList] = useState([]);
 
     const [tmdbResults, setTmdbResults] = useState([]);
     const [apiPage, setApiPage] = useState(1);
+    const [totalApiPages, setTotalApiPages] = useState(1); // YENİ: API'den gelen gerçek toplam sayfa sayısı
     const [hasMoreApiPages, setHasMoreApiPages] = useState(true);
     const [isSearching, setIsSearching] = useState(false);
 
@@ -51,8 +53,8 @@ export default function SearchMedia() {
             if (currentQuery !== "") {
                 const response = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&language=tr-TR&query=${currentQuery}&page=${pageNum}`);
                 const data = await response.json();
-                newResults = data.results;
-                totalPagesFromApi = data.total_pages;
+                newResults = data.results || [];
+                totalPagesFromApi = data.total_pages || 1;
             } else if (currentGenre !== "") {
                 const [movieRes, tvRes] = await Promise.all([
                     fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_API_KEY}&language=tr-TR&with_genres=${currentGenre}&sort_by=popularity.desc&page=${pageNum}`),
@@ -60,16 +62,16 @@ export default function SearchMedia() {
                 ]);
                 const movieData = await movieRes.json();
                 const tvData = await tvRes.json();
-                const movies = movieData.results.map(m => ({...m, media_type: 'movie'}));
-                const tvs = tvData.results.map(t => ({...t, media_type: 'tv'}));
+                const movies = (movieData.results || []).map(m => ({...m, media_type: 'movie'}));
+                const tvs = (tvData.results || []).map(t => ({...t, media_type: 'tv'}));
 
                 newResults = [...movies, ...tvs].sort((a, b) => b.popularity - a.popularity);
                 totalPagesFromApi = Math.max(movieData.total_pages || 1, tvData.total_pages || 1);
             } else {
                 const response = await fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${TMDB_API_KEY}&language=tr-TR&page=${pageNum}`);
                 const data = await response.json();
-                newResults = data.results;
-                totalPagesFromApi = data.total_pages;
+                newResults = data.results || [];
+                totalPagesFromApi = data.total_pages || 1;
             }
 
             const filtered = newResults.filter(item => (item.media_type === 'movie' || item.media_type === 'tv') && item.poster_path);
@@ -81,6 +83,7 @@ export default function SearchMedia() {
                 return Array.from(uniqueMap.values());
             });
 
+            setTotalApiPages(totalPagesFromApi); // DÜZELTME: API'nin sayfa kapasitesini devral
             setHasMoreApiPages(pageNum < totalPagesFromApi && pageNum < 500);
             setApiPage(pageNum);
         } catch (error) { console.error("API Hatası:", error); }
@@ -90,9 +93,11 @@ export default function SearchMedia() {
     useEffect(() => {
         setCurrentPage(1);
         fetchApiData(1, true, activeQuery, selectedGenre);
-    }, [activeQuery, selectedGenre]);
+    }, [activeQuery, selectedGenre]); // mediaFilter'ı API tetikleyiciye eklemiyoruz ki frontend tarafında hızlıca filtrelensin
 
+    // YENİ: Dizi/Film filtresinin arama sonuçlarına uygulanması
     const displayedResults = tmdbResults.filter(item => {
+        if (mediaFilter !== "all" && item.media_type !== mediaFilter) return false;
         if (!selectedGenre || activeQuery === "") return true;
         return item.genre_ids && item.genre_ids.includes(Number(selectedGenre));
     });
@@ -190,7 +195,7 @@ export default function SearchMedia() {
         <div className="search-media-container">
             <div className="search-header">
                 <h2>🍿 Keşfet ve Öneriler</h2>
-                <p>Aradığın yapımı bul veya tür seçerek yeni maceralar keşfet.</p>
+                <p>Film veya dizi aratıp listeye veya havuza ekle. Havuza eklenen filmler sevgilin tarafından kabul edilirse listeye eklenir.</p>
             </div>
 
             <div className="search-filter-wrapper" style={{display: 'flex', gap: '10px', maxWidth: '800px', margin: '0 auto 15px auto', flexWrap: 'wrap'}}>
@@ -210,11 +215,25 @@ export default function SearchMedia() {
                     </button>
                 </form>
 
+                {/* YENİ: Dizi / Film Filtresi Seçici */}
+                <div className="custom-select-wrapper">
+                    <select
+                        className="search-input custom-select"
+                        value={mediaFilter}
+                        onChange={(e) => { setMediaFilter(e.target.value); setCurrentPage(1); }}
+                    >
+                        <option value="all">🎬 Tüm Yapımlar</option>
+                        <option value="movie">🎞️ Sadece Filmler</option>
+                        <option value="tv">📺 Sadece Diziler</option>
+                    </select>
+                    <i className="fa-solid fa-chevron-down select-arrow"></i>
+                </div>
+
                 <div className="custom-select-wrapper">
                     <select
                         className="search-input custom-select"
                         value={selectedGenre}
-                        onChange={(e) => setSelectedGenre(e.target.value)}
+                        onChange={(e) => { setSelectedGenre(e.target.value); setCurrentPage(1); }}
                     >
                         <option value="">{selectedGenre ? "❌ Filtreyi Kaldır" : "🎭 Tür Seç / Filtrele"}</option>
                         {genresList.map(genre => (
@@ -285,7 +304,8 @@ export default function SearchMedia() {
                     })}
                 </div>
             )}
-            
+
+            {/* DÜZELTME: "Total Pages" UI Görünümü Artık Dinamik */}
             {(hasMoreApiPages || localTotalPages > 1) && (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '30px', paddingBottom: '20px' }}>
                     <button onClick={prevPage} disabled={currentPage === 1 || isSearching} className="pagination-btn">
@@ -293,7 +313,7 @@ export default function SearchMedia() {
                     </button>
 
                     <span style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>
-                        Sayfa {currentPage}
+                        Sayfa {currentPage} <span style={{color: 'var(--text-muted)', fontSize: '0.9rem'}}>/ {hasMoreApiPages ? '...' : localTotalPages}</span>
                     </span>
 
                     <button onClick={nextPage} disabled={(!hasMoreApiPages && currentPage >= localTotalPages) || isSearching} className="pagination-btn">

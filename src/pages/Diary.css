@@ -1,0 +1,346 @@
+﻿.diary-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* --- MASONRY / GRID GÖRÜNÜMÜ --- */
+.diary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    padding-bottom: 40px;
+}
+
+.diary-card {
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.diary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+    border-color: var(--accent-color);
+}
+
+.diary-card-cover {
+    width: 100%;
+    height: 140px;
+    overflow: hidden;
+}
+
+.diary-card-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.diary-card:hover .diary-card-cover img {
+    transform: scale(1.05);
+}
+
+.diary-card-content {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.diary-card-tag {
+    align-self: flex-start;
+    background: rgba(236, 72, 153, 0.15);
+    color: var(--accent-color);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    border: 1px solid rgba(236, 72, 153, 0.2);
+}
+
+.diary-card h3 {
+    margin: 0 0 10px 0;
+    color: var(--text-main);
+    font-size: 1.25rem;
+    line-height: 1.3;
+}
+
+.diary-card-snippet {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 15px 0;
+    /* Uzun metni 3 satırda sınırla ve sonuna ... koy */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+}
+
+.diary-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    opacity: 0.8;
+}
+
+/* --- OKUMA EKRANI (VIEW MODAL) --- */
+.diary-view-modal {
+    background: var(--bg-color);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    border-radius: 20px;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    border: 1px solid var(--border-color);
+}
+
+.diary-view-cover {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    display: block;
+}
+
+.diary-view-body {
+    padding: 40px;
+}
+
+@media (max-width: 768px) {
+    .diary-view-body { padding: 20px; }
+    .diary-view-cover { height: 200px; }
+}
+
+.diary-view-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.diary-view-date {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.diary-view-title {
+    font-size: 2.5rem;
+    color: var(--text-main);
+    margin: 0 0 30px 0;
+    line-height: 1.2;
+}
+
+.diary-view-text {
+    color: var(--text-main);
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+.diary-view-text p {
+    margin-bottom: 20px;
+}
+
+.diary-view-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.edit-btn {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.edit-btn:hover { background: #3b82f6; color: white; }
+
+.diary-form-modal {
+    max-width: 700px;
+}
+
+/* --- YENİ: GÜNLÜK EKLERİ (FORM İÇİ YÖNETİM) --- */
+.attachments-manager {
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 5px;
+}
+
+.attachments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.attachments-list::-webkit-scrollbar { width: 4px; }
+.attachments-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+
+.attachment-item {
+    display: flex;
+    align-items: center;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 8px;
+    gap: 12px;
+}
+
+.att-icon {
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.att-name {
+    flex: 1;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.att-remove {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 5px;
+    transition: color 0.2s;
+}
+
+.att-remove:hover { color: #ef4444; }
+
+.attachments-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* --- YENİ: OKUMA MODUNDA (VIEW) EKLERİN GÖSTERİMİ --- */
+.diary-view-attachments-section {
+    margin-top: 40px;
+    padding-top: 25px;
+    border-top: 2px dashed var(--border-color);
+}
+
+.attachments-title {
+    margin: 0 0 15px 0;
+    color: var(--text-main);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.attachments-display-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.attachment-display-card {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-color);
+    padding: 12px 15px;
+    border-radius: 12px;
+    text-decoration: none;
+    gap: 12px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.attachment-display-card:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: var(--accent-color);
+    transform: translateY(-3px);
+}
+
+.attachment-display-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+}
+
+.attachment-display-card.link::before { background: #3b82f6; }
+.attachment-display-card.image::before { background: #10b981; }
+.attachment-display-card.file::before { background: #f59e0b; }
+
+.att-display-icon {
+    font-size: 1.5rem;
+    opacity: 0.8;
+}
+
+.link .att-display-icon { color: #3b82f6; }
+.image .att-display-icon { color: #10b981; }
+.file .att-display-icon { color: #f59e0b; }
+
+.att-display-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+.att-display-name {
+    color: var(--text-main);
+    font-size: 0.95rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.att-display-type {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.external-icon {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.attachment-display-card:hover .external-icon {
+    opacity: 1;
+    color: var(--accent-color);
+}
